@@ -2237,15 +2237,6 @@
         return;
       }
 
-      let questionContent = "Question text not found";
-      try {
-        const qCard = document.getElementById('q' + currentReportQNum);
-        if (qCard) {
-          const qTextElem = qCard.querySelector('.question-text');
-          if (qTextElem) questionContent = qTextElem.innerText.trim();
-        }
-      } catch (e) {}
-
       const btn = document.getElementById('btn-send-report-action');
       btn.textContent = 'Sending...';
       btn.disabled = true;
@@ -2263,8 +2254,7 @@
           subject: 'CLEP Precalc – Report: Question ' + currentReportQNum,
           from_name: name,
           Question_Number: currentReportQNum,
-          Issue_Description: issue,
-          Question_Text: questionContent
+          Issue_Description: issue
         })
       })
         .then(response => response.json())
