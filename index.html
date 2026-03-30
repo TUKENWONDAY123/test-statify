@@ -500,7 +500,109 @@
       top: 0.04em;
     }
 
-    .sqrt-inner {
+    /* TI-84 Calculator Styles */
+    #calc-toggle {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 1000;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 50px;
+      padding: 12px 24px;
+      font-family: 'Source Serif 4', serif;
+      font-weight: 600;
+      font-size: 0.9rem;
+      letter-spacing: 0.05em;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: transform 0.2s, background 0.2s;
+    }
+
+    #calc-toggle:hover {
+      background: var(--ink);
+      transform: translateY(-2px);
+    }
+
+    #calc-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(4px);
+      z-index: 2000;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #calc-modal.show {
+      display: flex;
+    }
+
+    .calc-container {
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+      width: 90%;
+      max-width: 640px;
+      height: 90%;
+      max-height: 850px;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .calc-header {
+      background: var(--ink);
+      color: var(--paper);
+      padding: 10px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid var(--gold);
+    }
+
+    .calc-header h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.1rem;
+      margin: 0;
+    }
+
+    .calc-close {
+      background: transparent;
+      border: none;
+      color: var(--paper);
+      font-size: 1.5rem;
+      cursor: pointer;
+      line-height: 1;
+      padding: 0;
+    }
+
+    .calc-close:hover {
+      color: var(--accent);
+    }
+
+    .calc-iframe-wrap {
+      flex: 1;
+      width: 100%;
+      height: 100%;
+      background: #f0f0f0;
+    }
+
+    .calc-iframe-wrap iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+  </style>-inner {
       display: inline-block;
       border-top: 1.5px solid currentColor;
       padding: 0.05em 0.2em 0 0.1em;
@@ -2226,6 +2328,22 @@
 
   <footer>CLEP Precalculus — 48 Practice Questions &nbsp;·&nbsp; For study purposes only</footer>
 
+  <button id="calc-toggle" onclick="toggleCalculator()">
+    <span>🔢</span> TI-84 Calculator
+  </button>
+
+  <div id="calc-modal">
+    <div class="calc-container">
+      <div class="calc-header">
+        <h3>TI-84 Plus CE Emulator</h3>
+        <button class="calc-close" onclick="toggleCalculator()">&times;</button>
+      </div>
+      <div class="calc-iframe-wrap">
+        <iframe src="https://ti84calc.com/ti84calc" allow="fullscreen"></iframe>
+      </div>
+    </div>
+  </div>
+
   <script>
     /* ── Report button injection ── */
     let currentReportQNum = null;
@@ -2396,6 +2514,31 @@
 
         markAnswered(fullQId);
       });
+    });
+
+    /* TI-84 Calculator Logic */
+    function toggleCalculator() {
+      const modal = document.getElementById('calc-modal');
+      modal.classList.toggle('show');
+      
+      // Prevent scrolling when modal is open
+      if (modal.classList.contains('show')) {
+        document.body.style.overflow = 'hidden';
+      } else {
+        document.body.style.overflow = '';
+      }
+    }
+
+    // Close calculator on backdrop click
+    document.getElementById('calc-modal').addEventListener('click', function(e) {
+      if (e.target === this) toggleCalculator();
+    });
+
+    // Close calculator on Escape key
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && document.getElementById('calc-modal').classList.contains('show')) {
+        toggleCalculator();
+      }
     });
   </script>
 </body>
