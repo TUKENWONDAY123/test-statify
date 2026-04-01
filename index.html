@@ -1264,9 +1264,20 @@
             waleed3: { name: 'Waleed 3', password: 'admin', icon: '🔬', accent: '#00d9a3', glow: 'rgba(0,217,163,0.2)' },
         };
 
-        let STUDENTS = { ...STUDENTS_CONFIG };
-
+        let STUDENTS = {};
         const ADMIN_PASSWORD = 'waleedface';
+
+        function initStudents() {
+            const deletedUsers = JSON.parse(localStorage.getItem('deleted_users') || '[]');
+            STUDENTS = {};
+            for (const [id, config] of Object.entries(STUDENTS_CONFIG)) {
+                if (!deletedUsers.includes(id)) {
+                    STUDENTS[id] = config;
+                }
+            }
+        }
+
+        initStudents();
 
         // ── STATE ──
         let currentStudent = null;
@@ -1363,6 +1374,7 @@
 
             if (!db) {
                 localStorage.removeItem(`notes_${userId}`);
+                localStorage.setItem('deleted_users', JSON.stringify([...JSON.parse(localStorage.getItem('deleted_users') || '[]'), userId]));
                 delete STUDENTS[userId];
                 renderAdminUsers();
                 await loadAllNotes();
@@ -1373,6 +1385,7 @@
             try {
                 const { error } = await db.from('notes').delete().eq('student_id', userId);
                 if (error) throw error;
+                localStorage.setItem('deleted_users', JSON.stringify([...JSON.parse(localStorage.getItem('deleted_users') || '[]'), userId]));
                 delete STUDENTS[userId];
                 renderAdminUsers();
                 await loadAllNotes();
@@ -1380,6 +1393,7 @@
             } catch (err) {
                 console.error(err);
                 localStorage.removeItem(`notes_${userId}`);
+                localStorage.setItem('deleted_users', JSON.stringify([...JSON.parse(localStorage.getItem('deleted_users') || '[]'), userId]));
                 delete STUDENTS[userId];
                 renderAdminUsers();
                 await loadAllNotes();
@@ -1395,7 +1409,7 @@
                 let all = [];
                 for (const sid in STUDENTS) {
                     const stored = JSON.parse(localStorage.getItem(`notes_${sid}`) || '[]');
-                    all = all.concat(stored.map(n => ({ ...n, _owner: sid })));
+                    all = all.concat(stored.map(n => ({ ...n, student_id: sid })));
                 }
                 allNotes = all.sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at));
                 renderAdminNotes(allNotes);
@@ -1406,13 +1420,14 @@
                 const { data, error } = await db.from('notes').select('*').order('updated_at', { ascending: false });
                 if (error) throw error;
                 allNotes = data || [];
+                allNotes = allNotes.filter(n => STUDENTS[n.student_id]);
                 renderAdminNotes(allNotes);
             } catch (e) {
                 console.error(e);
                 let all = [];
                 for (const sid in STUDENTS) {
                     const stored = JSON.parse(localStorage.getItem(`notes_${sid}`) || '[]');
-                    all = all.concat(stored.map(n => ({ ...n, _owner: sid })));
+                    all = all.concat(stored.map(n => ({ ...n, student_id: sid })));
                 }
                 allNotes = all.sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at));
                 renderAdminNotes(allNotes);
@@ -1470,6 +1485,7 @@
                 renderAdminNotes(allNotes);
                 showToast('🗑️ Note deleted', 'success');
             } catch {
+                console.log('Supabase delete failed, falling back to localStorage');
                 let stored = JSON.parse(localStorage.getItem(`notes_${studentId}`) || '[]');
                 stored = stored.filter(n => n.id !== id);
                 localStorage.setItem(`notes_${studentId}`, JSON.stringify(stored));
@@ -1524,7 +1540,7 @@
             currentStudent = null;
             isAdmin = false;
             allNotes = [];
-            STUDENTS = { ...STUDENTS_CONFIG };
+            initStudents();
             document.getElementById('screen-notes').classList.remove('active');
             document.getElementById('screen-landing').style.display = 'flex';
             document.getElementById('student-grid').style.display = 'grid';
