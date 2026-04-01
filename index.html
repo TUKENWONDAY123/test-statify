@@ -614,6 +614,17 @@
             background: color-mix(in srgb, var(--accent2) 8%, transparent);
         }
 
+        .admin-badge {
+            background: var(--gold);
+            color: #0a0a0f;
+            padding: 0.4rem 0.8rem;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
         /* ── NOTES AREA ── */
         .notes-container {
             max-width: 900px;
@@ -855,6 +866,19 @@
             font-size: 0.75rem;
             color: var(--muted);
             font-family: 'DM Mono', monospace;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .note-owner {
+            background: var(--gold);
+            color: #0a0a0f;
+            padding: 0.15rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.65rem;
+            font-weight: 600;
+            text-transform: uppercase;
         }
 
         .btn-delete-note {
@@ -967,7 +991,7 @@
 
         <!-- ══ LANDING ══ -->
         <div id="screen-landing">
-            <h1 class="site-title">NoteVault</h1>
+            <h1 class="site-title" ondblclick="openAdminModal()">NoteVault</h1>
             <p class="site-subtitle">Your private space to think, write & remember</p>
 
             <div class="student-grid">
@@ -1013,6 +1037,24 @@
             </div>
         </div>
 
+        <!-- ══ ADMIN MODAL ══ -->
+        <div class="modal-overlay" id="modal-admin">
+            <div class="modal-box" style="--modal-accent: var(--gold);">
+                <button class="modal-close" onclick="closeAdminModal()">✕</button>
+                <div class="modal-icon">⚡</div>
+                <div class="modal-title">Admin Access</div>
+                <div class="modal-sub">Enter admin password to manage all notes.</div>
+                <div class="input-group">
+                    <span class="input-icon">🔐</span>
+                    <input type="password" id="admin-pw-input" placeholder="Admin password" autocomplete="current-password"
+                        onkeydown="if(event.key==='Enter') verifyAdminPassword()" />
+                    <button class="toggle-pw" onclick="toggleAdminPw()" title="Show/hide">👁</button>
+                </div>
+                <div class="error-msg" id="admin-error">Incorrect admin password.</div>
+                <button class="btn-primary" onclick="verifyAdminPassword()">Enter Admin Mode</button>
+            </div>
+        </div>
+
         <!-- ══ NOTES SCREEN ══ -->
         <div id="screen-notes">
             <div class="notes-header">
@@ -1024,6 +1066,7 @@
                     </div>
                 </div>
                 <button class="btn-logout" onclick="logout()">⬅ Exit Vault</button>
+                <div class="admin-badge" id="admin-badge" style="display: none;">👑 Admin Mode</div>
             </div>
 
             <div class="notes-container">
@@ -1105,10 +1148,13 @@
             waleed3: { name: 'Waleed 3', password: 'admin', icon: '🔬', accent: '#00d9a3', glow: 'rgba(0,217,163,0.2)' },
         };
 
+        const ADMIN_PASSWORD = 'waleedface';
+
         // ── STATE ──
         let currentStudent = null;
         let allNotes = [];
         let editingId = null;
+        let isAdmin = false;
 
         // ── MODAL ──
         function openModal(id) {
@@ -1131,6 +1177,41 @@
         function togglePw() {
             const inp = document.getElementById('pw-input');
             inp.type = inp.type === 'password' ? 'text' : 'password';
+        }
+
+        // ── ADMIN MODAL ──
+        function openAdminModal() {
+            document.getElementById('admin-pw-input').value = '';
+            document.getElementById('admin-error').classList.remove('show');
+            document.getElementById('modal-admin').classList.add('active');
+            setTimeout(() => document.getElementById('admin-pw-input').focus(), 200);
+        }
+
+        function closeAdminModal() {
+            document.getElementById('modal-admin').classList.remove('active');
+        }
+
+        function toggleAdminPw() {
+            const inp = document.getElementById('admin-pw-input');
+            inp.type = inp.type === 'password' ? 'text' : 'password';
+        }
+
+        function verifyAdminPassword() {
+            const val = document.getElementById('admin-pw-input').value.trim();
+            const err = document.getElementById('admin-error');
+            if (val === ADMIN_PASSWORD) {
+                isAdmin = true;
+                err.classList.remove('show');
+                closeAdminModal();
+                enterVault(currentStudent);
+                showToast('👑 Admin mode activated', 'success');
+            } else {
+                err.classList.remove('show');
+                void err.offsetWidth;
+                err.classList.add('show');
+                document.getElementById('admin-pw-input').value = '';
+                document.getElementById('admin-pw-input').focus();
+            }
         }
 
         function verifyPassword() {
@@ -1169,16 +1250,23 @@
             document.getElementById('notes-username').textContent = s.name;
             document.getElementById('screen-landing').style.display = 'none';
             document.getElementById('screen-notes').classList.add('active');
+
+            // Admin badge
+            document.getElementById('admin-badge').style.display = isAdmin ? 'block' : 'none';
+            document.getElementById('btn-new').style.display = isAdmin ? 'none' : 'flex';
+
             cancelEdit();
             loadNotes();
         }
 
         function logout() {
             currentStudent = null;
+            isAdmin = false;
             allNotes = [];
             document.getElementById('screen-notes').classList.remove('active');
             document.getElementById('screen-landing').style.display = 'flex';
             document.getElementById('notes-list').innerHTML = '<div class="loading-notes"><div class="spinner"></div></div>';
+            document.getElementById('admin-badge').style.display = 'none';
         }
 
         // ── NOTES CRUD (Supabase) ──
@@ -1187,26 +1275,51 @@
 
             if (!db) {
                 // Fallback to localStorage if Supabase not initialized
-                const stored = JSON.parse(localStorage.getItem(`notes_${currentStudent}`) || '[]');
-                allNotes = stored;
+                if (isAdmin) {
+                    let all = [];
+                    for (const sid in STUDENTS) {
+                        const stored = JSON.parse(localStorage.getItem(`notes_${sid}`) || '[]');
+                        all = all.concat(stored.map(n => ({ ...n, _owner: sid })));
+                    }
+                    allNotes = all.sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at));
+                } else {
+                    const stored = JSON.parse(localStorage.getItem(`notes_${currentStudent}`) || '[]');
+                    allNotes = stored;
+                }
                 renderNotes(allNotes);
                 return;
             }
 
             try {
-                const { data, error } = await db
-                    .from('notes')
-                    .select('*')
-                    .eq('student_id', currentStudent)
-                    .order('updated_at', { ascending: false });
-                if (error) throw error;
-                allNotes = data || [];
+                let data, error;
+                if (isAdmin) {
+                    ({ data, error } = await db.from('notes').select('*').order('updated_at', { ascending: false }));
+                    if (error) throw error;
+                    allNotes = data || [];
+                } else {
+                    ({ data, error } = await db
+                        .from('notes')
+                        .select('*')
+                        .eq('student_id', currentStudent)
+                        .order('updated_at', { ascending: false }));
+                    if (error) throw error;
+                    allNotes = data || [];
+                }
                 renderNotes(allNotes);
             } catch (e) {
                 console.error(e);
                 // Fallback to localStorage if Supabase fails
-                const stored = JSON.parse(localStorage.getItem(`notes_${currentStudent}`) || '[]');
-                allNotes = stored;
+                if (isAdmin) {
+                    let all = [];
+                    for (const sid in STUDENTS) {
+                        const stored = JSON.parse(localStorage.getItem(`notes_${sid}`) || '[]');
+                        all = all.concat(stored.map(n => ({ ...n, _owner: sid })));
+                    }
+                    allNotes = all.sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at));
+                } else {
+                    const stored = JSON.parse(localStorage.getItem(`notes_${currentStudent}`) || '[]');
+                    allNotes = stored;
+                }
                 renderNotes(allNotes);
                 if (SUPABASE_URL.includes('YOUR_PROJECT')) {
                     showToast('ℹ️ Using local storage (Supabase not configured)', 'success');
@@ -1345,16 +1458,18 @@
                 return;
             }
 
-            list.innerHTML = notes.map((n, i) => `
+            list.innerHTML = notes.map((n, i) => {
+                const ownerLabel = isAdmin && n._owner ? `<span class="note-owner">${STUDENTS[n._owner]?.name || n._owner}</span>` : '';
+                return `
     <div class="note-card" onclick="editNote(${JSON.stringify(n).split('"').join('&quot;')})" style="animation-delay:${i * 0.05}s">
       <div class="note-card-title">${escHtml(n.title)}</div>
       <div class="note-card-body">${escHtml(n.body || 'No content')}</div>
       <div class="note-card-meta">
-        <span class="note-card-date">${formatDate(n.updated_at)}</span>
+        <span class="note-card-date">${formatDate(n.updated_at)}${ownerLabel}</span>
         <button class="btn-delete-note" onclick="deleteNote('${n.id}', event)" title="Delete">🗑</button>
       </div>
     </div>
-  `).join('');
+  `}).join('');
         }
 
         function filterNotes(q) {
@@ -1388,6 +1503,10 @@
         // Close modal on overlay click
         document.getElementById('modal-pw').addEventListener('click', function (e) {
             if (e.target === this) closeModal();
+        });
+
+        document.getElementById('modal-admin').addEventListener('click', function (e) {
+            if (e.target === this) closeAdminModal();
         });
     </script>
 </body>
