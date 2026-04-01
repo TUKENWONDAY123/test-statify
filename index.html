@@ -1276,8 +1276,34 @@
                 .subscribe(async (status) => {
                     if (status === 'SUBSCRIBED') {
                         await channel.track({ is_host: isHost, joined_at: new Date().toISOString() });
+                        if (!isHost) {
+                            broadcastEvent('REQUEST_SYNC', {});
+                        }
                     }
                 });
+        }
+            });
+
+        channel
+            .on('broadcast', { event: 'sync' }, ({ payload }) => {
+                handleRemoteEvent(payload);
+            })
+            .on('presence', { event: 'sync' }, () => {
+                const state = channel.presenceState();
+                const participants = [];
+                for (const key in state) {
+                    state[key].forEach(p => participants.push({ name: key, is_host: p.is_host }));
+                }
+                updateParticipants(participants);
+            })
+            .subscribe(async (status) => {
+                if (status === 'SUBSCRIBED') {
+                    await channel.track({ is_host: isHost, joined_at: new Date().toISOString() });
+                    if (!isHost) {
+                        broadcastEvent('REQUEST_SYNC', {});
+                    }
+                }
+            });
         }
 
         function updateParticipants(participants) {
@@ -1344,6 +1370,22 @@
         }
 
         function handleRemoteEvent(payload) {
+            if (payload.sender === currentUserName) return;
+
+            if (isHost && payload.type === 'REQUEST_SYNC') {
+                if (player) {
+                    const videoUrl = player.getVideoUrl();
+                    const videoId = videoUrl ? extractVideoId(videoUrl) : null;
+                    if (videoId) {
+                        broadcastEvent('LOAD', { videoId });
+                        setTimeout(() => {
+                            broadcastEvent('PLAY', { time: player.getCurrentTime() });
+                        }, 1000);
+                    }
+                }
+                return;
+            }
+
             if (isHost || !player) return;
 
             isSyncing = true;
@@ -1359,10 +1401,6 @@
                 const currentTime = player.getCurrentTime();
                 if (Math.abs(currentTime - payload.time) > 1.5 || payload.force) {
                     player.seekTo(payload.time, true);
-                }
-            } else if (payload.type === 'REQUEST_SYNC') {
-                if (isHost && player) {
-                    broadcastEvent('REQUEST_SYNC_REPLY', { time: player.getCurrentTime(), videoId: extractVideoId(player.getVideoUrl()), force: true });
                 }
             }
             setTimeout(() => { isSyncing = false; }, 500);
