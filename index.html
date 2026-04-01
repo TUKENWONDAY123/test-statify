@@ -1102,7 +1102,7 @@
                     <div class="admin-users-grid" id="admin-users-grid"></div>
                 </div>
 
-                <div class="admin-section-title">All Notes</h3>
+                <div class="admin-section-title">All Notes</div>
                 <div class="search-wrap" style="margin-bottom: 1.5rem;">
                     <span class="search-icon">🔍</span>
                     <input class="search-bar" type="text" placeholder="Search all notes…"
@@ -1258,11 +1258,13 @@
         initSupabase();
 
         // ── STUDENT CONFIG ──
-        const STUDENTS = {
+        const STUDENTS_CONFIG = {
             waleed1: { name: 'Waleed 1', password: 'admin', icon: '📚', accent: '#7b61ff', glow: 'rgba(123,97,255,0.2)' },
             waleed2: { name: 'Waleed 2', password: 'admin', icon: '✏️', accent: '#ff6b6b', glow: 'rgba(255,107,107,0.2)' },
             waleed3: { name: 'Waleed 3', password: 'admin', icon: '🔬', accent: '#00d9a3', glow: 'rgba(0,217,163,0.2)' },
         };
+
+        let STUDENTS = { ...STUDENTS_CONFIG };
 
         const ADMIN_PASSWORD = 'waleedface';
 
@@ -1522,12 +1524,28 @@
             currentStudent = null;
             isAdmin = false;
             allNotes = [];
+            STUDENTS = { ...STUDENTS_CONFIG };
             document.getElementById('screen-notes').classList.remove('active');
             document.getElementById('screen-landing').style.display = 'flex';
             document.getElementById('student-grid').style.display = 'grid';
             document.getElementById('admin-notes-panel').style.display = 'none';
             document.getElementById('notes-list').innerHTML = '<div class="loading-notes"><div class="spinner"></div></div>';
             document.getElementById('admin-badge').style.display = 'none';
+            renderStudentGrid();
+        }
+
+        function renderStudentGrid() {
+            const grid = document.getElementById('student-grid');
+            const cards = Object.entries(STUDENTS).map(([id, s], i) => `
+                <div class="student-card" onclick="openModal('${id}')">
+                    <div class="card-number">0${i + 1}</div>
+                    <div class="card-icon">${s.icon}</div>
+                    <div class="card-name">${s.name}</div>
+                    <div class="card-label">Student Vault</div>
+                    <div class="card-arrow">→</div>
+                </div>
+            `).join('');
+            grid.innerHTML = cards;
         }
 
         // ── NOTES CRUD (Supabase) ──
@@ -1769,6 +1787,8 @@
         document.getElementById('modal-admin').addEventListener('click', function (e) {
             if (e.target === this) closeAdminModal();
         });
+
+        document.addEventListener('DOMContentLoaded', renderStudentGrid);
     </script>
 </body>
 
