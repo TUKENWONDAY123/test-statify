@@ -1087,8 +1087,16 @@
         const SUPABASE_URL = 'https://ejwqhywmmkhbvpuroowm.supabase.co';   // ← replace
         const SUPABASE_ANON = 'sb_publishable_vMG32X-EXlFoZBc98LFTog_Rtr1VgaX';                       // ← replace
 
-        const { createClient } = supabase;
-        const db = createClient(SUPABASE_URL, SUPABASE_ANON);
+        let db = null;
+        
+        function initSupabase() {
+            if (window.supabase) {
+                const { createClient } = window.supabase;
+                db = createClient(SUPABASE_URL, SUPABASE_ANON);
+            }
+        }
+        
+        initSupabase();
 
         // ── STUDENT CONFIG ──
         const STUDENTS = {
@@ -1118,7 +1126,6 @@
 
         function closeModal() {
             document.getElementById('modal-pw').classList.remove('active');
-            currentStudent = null;
         }
 
         function togglePw() {
@@ -1133,17 +1140,12 @@
             if (!currentStudent) return;
             if (val === STUDENTS[currentStudent].password) {
                 err.classList.remove('show');
-                btn.innerHTML = '<span class="spinner"></span>';
-                btn.disabled = true;
-                setTimeout(() => {
-                    btn.innerHTML = 'Unlock Vault';
-                    btn.disabled = false;
-                    closeModal();
-                    enterVault(currentStudent);
-                }, 600);
+                const studentId = currentStudent;
+                closeModal();
+                enterVault(studentId);
             } else {
                 err.classList.remove('show');
-                void err.offsetWidth; // reflow for re-animation
+                void err.offsetWidth;
                 err.classList.add('show');
                 document.getElementById('pw-input').value = '';
                 document.getElementById('pw-input').focus();
@@ -1182,6 +1184,15 @@
         // ── NOTES CRUD (Supabase) ──
         async function loadNotes() {
             document.getElementById('notes-list').innerHTML = '<div class="loading-notes"><div class="spinner"></div></div>';
+            
+            if (!db) {
+                // Fallback to localStorage if Supabase not initialized
+                const stored = JSON.parse(localStorage.getItem(`notes_${currentStudent}`) || '[]');
+                allNotes = stored;
+                renderNotes(allNotes);
+                return;
+            }
+            
             try {
                 const { data, error } = await db
                     .from('notes')
@@ -1193,7 +1204,7 @@
                 renderNotes(allNotes);
             } catch (e) {
                 console.error(e);
-                // Fallback to localStorage if Supabase not configured
+                // Fallback to localStorage if Supabase fails
                 const stored = JSON.parse(localStorage.getItem(`notes_${currentStudent}`) || '[]');
                 allNotes = stored;
                 renderNotes(allNotes);
@@ -1211,6 +1222,24 @@
             const btn = document.getElementById('btn-save');
             btn.innerHTML = '<span class="spinner"></span>';
             btn.disabled = true;
+
+            // Use localStorage if db not initialized
+            if (!db) {
+                let stored = JSON.parse(localStorage.getItem(`notes_${currentStudent}`) || '[]');
+                if (editingId) {
+                    stored = stored.map(n => n.id === editingId ? { ...n, title, body, updated_at: new Date().toISOString() } : n);
+                } else {
+                    stored.unshift({ id: crypto.randomUUID(), student_id: currentStudent, title, body, created_at: new Date().toISOString(), updated_at: new Date().toISOString() });
+                }
+                localStorage.setItem(`notes_${currentStudent}`, JSON.stringify(stored));
+                allNotes = stored;
+                renderNotes(allNotes);
+                cancelEdit();
+                showToast('✅ Note saved locally!', 'success');
+                btn.innerHTML = 'Save Note';
+                btn.disabled = false;
+                return;
+            }
 
             try {
                 if (editingId) {
@@ -1245,6 +1274,18 @@
         async function deleteNote(id, e) {
             e.stopPropagation();
             if (!confirm('Delete this note?')) return;
+
+            // Use localStorage if db not initialized
+            if (!db) {
+                let stored = JSON.parse(localStorage.getItem(`notes_${currentStudent}`) || '[]');
+                stored = stored.filter(n => n.id !== id);
+                localStorage.setItem(`notes_${currentStudent}`, JSON.stringify(stored));
+                allNotes = stored;
+                renderNotes(allNotes);
+                showToast('🗑️ Note deleted', 'success');
+                return;
+            }
+
             try {
                 const { error } = await db.from('notes').delete().eq('id', id);
                 if (error) throw error;
