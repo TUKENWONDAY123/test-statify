@@ -2,802 +2,488 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SHITBOX - Watch Together</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NoteVault — Student Notes</title>
     <link
-        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap"
-        rel="stylesheet">
+        href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;500;600&display=swap"
+        rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root {
+            --bg: #0a0a0f;
+            --surface: #111118;
+            --card: #16161f;
+            --border: #2a2a3a;
+            --accent1: #7b61ff;
+            --accent2: #ff6b6b;
+            --accent3: #00d9a3;
+            --gold: #f5c842;
+            --text: #e8e8f0;
+            --muted: #6b6b88;
+            --glow1: rgba(123, 97, 255, 0.18);
+            --glow2: rgba(255, 107, 107, 0.15);
+            --glow3: rgba(0, 217, 163, 0.15);
         }
 
-        :root {
-            --bg-dark: #030712;
-            --bg-card: rgba(17, 24, 39, 0.7);
-            --border-color: rgba(255, 255, 255, 0.08);
-            --accent-cyan: #06b6d4;
-            --accent-violet: #8b5cf6;
-            --accent-emerald: #10b981;
-            --accent-amber: #f59e0b;
-            --accent-red: #ef4444;
-            --accent-pink: #ec4899;
-            --text-primary: #f9fafb;
-            --text-secondary: #9ca3af;
-            --text-muted: #6b7280;
-            --glow-cyan: rgba(6, 182, 212, 0.4);
-            --glow-violet: rgba(139, 92, 246, 0.4);
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
 
         body {
+            background: var(--bg);
+            color: var(--text);
             font-family: 'Outfit', sans-serif;
-            background: var(--bg-dark);
-            color: var(--text-primary);
             min-height: 100vh;
             overflow-x: hidden;
         }
 
-        .bg-grid {
+        /* ── NOISE OVERLAY ── */
+        body::before {
+            content: '';
             position: fixed;
             inset: 0;
-            background-image:
-                linear-gradient(rgba(6, 182, 212, 0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(6, 182, 212, 0.03) 1px, transparent 1px);
-            background-size: 60px 60px;
-            pointer-events: none;
             z-index: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+            opacity: 0.025;
+            pointer-events: none;
         }
 
-        .gradient-orb {
+        /* ── BG BLOBS ── */
+        .blob {
             position: fixed;
             border-radius: 50%;
-            filter: blur(100px);
+            filter: blur(80px);
             pointer-events: none;
             z-index: 0;
-            animation: float 20s ease-in-out infinite;
+            animation: blobFloat 8s ease-in-out infinite;
         }
 
-        .orb-1 {
-            width: 600px;
-            height: 600px;
-            background: radial-gradient(circle, rgba(6, 182, 212, 0.15) 0%, transparent 70%);
-            top: -200px;
-            left: -200px;
-        }
-
-        .orb-2 {
-            width: 500px;
-            height: 500px;
-            background: radial-gradient(circle, rgba(139, 92, 246, 0.12) 0%, transparent 70%);
-            bottom: -150px;
-            right: -150px;
-            animation-delay: -10s;
-        }
-
-        .orb-3 {
+        .blob-1 {
             width: 400px;
             height: 400px;
-            background: radial-gradient(circle, rgba(16, 185, 129, 0.08) 0%, transparent 70%);
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            animation: pulse 8s ease-in-out infinite;
+            background: var(--glow1);
+            top: -100px;
+            left: -100px;
+            animation-delay: 0s;
         }
 
-        @keyframes float {
+        .blob-2 {
+            width: 300px;
+            height: 300px;
+            background: var(--glow2);
+            bottom: 100px;
+            right: -80px;
+            animation-delay: -3s;
+        }
+
+        .blob-3 {
+            width: 250px;
+            height: 250px;
+            background: var(--glow3);
+            bottom: -80px;
+            left: 30%;
+            animation-delay: -5s;
+        }
+
+        @keyframes blobFloat {
 
             0%,
             100% {
-                transform: translate(0, 0);
-            }
-
-            25% {
-                transform: translate(30px, -30px);
+                transform: translateY(0) scale(1);
             }
 
             50% {
-                transform: translate(-20px, 20px);
-            }
-
-            75% {
-                transform: translate(20px, 30px);
+                transform: translateY(-30px) scale(1.05);
             }
         }
 
-        @keyframes pulse {
-
-            0%,
-            100% {
-                opacity: 0.5;
-                transform: translate(-50%, -50%) scale(1);
-            }
-
-            50% {
-                opacity: 0.8;
-                transform: translate(-50%, -50%) scale(1.1);
-            }
-        }
-
-        .app-container {
+        /* ── LAYOUT ── */
+        #app {
             position: relative;
             z-index: 1;
             min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
         }
 
-        .screen {
-            display: none;
-            width: 100%;
-            max-width: 480px;
-        }
-
-        .screen.active {
+        /* ── LANDING ── */
+        #screen-landing {
             display: flex;
             flex-direction: column;
             align-items: center;
-            animation: screenIn 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            justify-content: center;
+            min-height: 100vh;
+            padding: 2rem;
+            animation: fadeIn 0.8s ease both;
         }
 
-        @keyframes screenIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px) scale(0.96);
-            }
+        .site-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: clamp(3.5rem, 10vw, 7rem);
+            letter-spacing: 0.08em;
+            background: linear-gradient(135deg, #7b61ff 0%, #ff6b6b 50%, #00d9a3 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 0.95;
+            text-align: center;
+            margin-bottom: 0.3em;
+            filter: drop-shadow(0 0 40px rgba(123, 97, 255, 0.4));
+        }
 
-            to {
-                opacity: 1;
-                transform: translateY(0) scale(1);
+        .site-subtitle {
+            font-family: 'DM Serif Display', serif;
+            font-style: italic;
+            font-size: clamp(1rem, 2.5vw, 1.4rem);
+            color: var(--muted);
+            margin-bottom: 4rem;
+            letter-spacing: 0.02em;
+        }
+
+        .student-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            width: 100%;
+            max-width: 820px;
+        }
+
+        @media (max-width: 600px) {
+            .student-grid {
+                grid-template-columns: 1fr;
             }
         }
 
-        @keyframes screenOut {
-            from {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
-
-            to {
-                opacity: 0;
-                transform: translateY(-20px) scale(0.96);
-            }
-        }
-
-        .glass-card {
-            background: linear-gradient(135deg, rgba(17, 24, 39, 0.8) 0%, rgba(17, 24, 39, 0.6) 100%);
-            backdrop-filter: blur(24px);
-            border: 1px solid var(--border-color);
-            border-radius: 28px;
+        .student-card {
             position: relative;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 2.4rem 1.8rem 2rem;
+            cursor: pointer;
             overflow: hidden;
+            transition: transform 0.35s cubic-bezier(.23, 1, .32, 1), border-color 0.3s, box-shadow 0.35s;
+            animation: cardIn 0.7s cubic-bezier(.23, 1, .32, 1) both;
         }
 
-        .glass-card::before {
+        .student-card:nth-child(1) {
+            animation-delay: 0.15s;
+            --card-accent: var(--accent1);
+            --card-glow: var(--glow1);
+        }
+
+        .student-card:nth-child(2) {
+            animation-delay: 0.28s;
+            --card-accent: var(--accent2);
+            --card-glow: var(--glow2);
+        }
+
+        .student-card:nth-child(3) {
+            animation-delay: 0.41s;
+            --card-accent: var(--accent3);
+            --card-glow: var(--glow3);
+        }
+
+        @keyframes cardIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .student-card::before {
             content: '';
             position: absolute;
             inset: 0;
-            border-radius: 28px;
-            padding: 1px;
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.02) 50%, rgba(255, 255, 255, 0.05) 100%);
-            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-            -webkit-mask-composite: xor;
-            mask-composite: exclude;
-            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            background: radial-gradient(circle at 70% 20%, var(--card-glow), transparent 65%);
+            opacity: 0;
+            transition: opacity 0.4s;
             pointer-events: none;
         }
 
-        #welcome-screen.active {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .welcome-content {
-            width: 100%;
-            padding: 48px 36px;
-            text-align: center;
-        }
-
-        .logo-wrapper {
-            position: relative;
-            display: inline-block;
-            margin-bottom: 24px;
-        }
-
-        .logo-glow {
-            position: absolute;
-            inset: -20px;
-            background: radial-gradient(circle, var(--glow-cyan) 0%, transparent 70%);
-            filter: blur(20px);
-            animation: glowBreath 3s ease-in-out infinite;
-        }
-
-        @keyframes glowBreath {
-
-            0%,
-            100% {
-                opacity: 0.5;
-                transform: scale(1);
-            }
-
-            50% {
-                opacity: 0.8;
-                transform: scale(1.1);
-            }
-        }
-
-        .logo-icon {
-            position: relative;
-            width: 72px;
-            height: 72px;
-            border-radius: 20px;
-            background: linear-gradient(135deg, rgba(6, 182, 212, 0.2), rgba(139, 92, 246, 0.2));
-            border: 1px solid rgba(6, 182, 212, 0.3);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--accent-cyan);
-            margin: 0 auto 16px;
-            box-shadow: 0 0 40px var(--glow-cyan);
-        }
-
-        .logo-text {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 32px;
-            font-weight: 800;
-            letter-spacing: 6px;
-            background: linear-gradient(135deg, #06b6d4 0%, #8b5cf6 50%, #06b6d4 100%);
-            background-size: 200% auto;
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-            animation: gradientFlow 3s linear infinite;
-        }
-
-        @keyframes gradientFlow {
-            to {
-                background-position: 200% center;
-            }
-        }
-
-        .tagline {
-            color: var(--text-secondary);
-            font-size: 15px;
-            margin-bottom: 40px;
-            letter-spacing: 0.5px;
-        }
-
-        .action-buttons {
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
-        }
-
-        .btn {
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            padding: 18px 32px;
-            border-radius: 16px;
-            font-family: 'Outfit', sans-serif;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-            border: none;
-            overflow: hidden;
-        }
-
-        .btn::before {
+        .student-card::after {
             content: '';
             position: absolute;
-            inset: 0;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-            transform: translateX(-100%);
-            transition: transform 0.6s ease;
-        }
-
-        .btn:hover::before {
-            transform: translateX(100%);
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #06b6d4 0%, #8b5cf6 100%);
-            color: white;
-            box-shadow: 0 4px 24px rgba(6, 182, 212, 0.3);
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-3px) scale(1.02);
-            box-shadow: 0 12px 40px rgba(6, 182, 212, 0.4), 0 0 0 4px rgba(6, 182, 212, 0.1);
-        }
-
-        .btn-secondary {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: var(--text-primary);
-        }
-
-        .btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.08);
-            border-color: rgba(6, 182, 212, 0.4);
-            transform: translateY(-2px);
-        }
-
-        .btn-danger {
-            background: rgba(239, 68, 68, 0.1);
-            border: 1px solid rgba(239, 68, 68, 0.3);
-            color: #fca5a5;
-        }
-
-        .btn-danger:hover {
-            background: rgba(239, 68, 68, 0.2);
-            border-color: rgba(239, 68, 68, 0.5);
-        }
-
-        .btn-small {
-            padding: 10px 18px;
-            font-size: 13px;
-        }
-
-        .btn-amber {
-            background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);
-        }
-
-        .btn-amber:hover {
-            box-shadow: 0 8px 30px rgba(245, 158, 11, 0.4);
-        }
-
-        .full-width {
-            width: 100%;
-        }
-
-        .screen:not(#welcome-screen) {
-            justify-content: center;
-        }
-
-        .modal-card {
-            width: 100%;
-            padding: 36px;
-            position: relative;
-        }
-
-        .back-btn {
-            position: absolute;
-            top: 24px;
-            left: 24px;
-            width: 40px;
-            height: 40px;
-            border-radius: 12px;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid var(--border-color);
-            color: var(--text-secondary);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
-            z-index: 10;
-        }
-
-        .back-btn:hover {
-            background: rgba(255, 255, 255, 0.08);
-            color: var(--text-primary);
-            transform: scale(1.1);
-        }
-
-        .modal-header {
-            text-align: center;
-            margin-bottom: 32px;
-        }
-
-        .modal-icon {
-            width: 64px;
-            height: 64px;
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 20px;
-            position: relative;
-        }
-
-        .modal-icon::after {
-            content: '';
-            position: absolute;
-            inset: -8px;
-            border-radius: 28px;
-            background: inherit;
-            filter: blur(16px);
-            opacity: 0.5;
+            inset: -1px;
+            border-radius: 21px;
+            background: linear-gradient(135deg, var(--card-accent), transparent 60%);
+            opacity: 0;
+            transition: opacity 0.3s;
             z-index: -1;
         }
 
-        .create-icon {
-            background: linear-gradient(135deg, rgba(6, 182, 212, 0.2), rgba(139, 92, 246, 0.2));
-            border: 1px solid rgba(6, 182, 212, 0.3);
-            color: var(--accent-cyan);
+        .student-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
         }
 
-        .join-icon {
-            background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(236, 72, 153, 0.2));
-            border: 1px solid rgba(139, 92, 246, 0.3);
-            color: var(--accent-violet);
+        .student-card:hover::before {
+            opacity: 1;
         }
 
-        .success-icon {
-            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(6, 182, 212, 0.2));
-            border: 1px solid rgba(16, 185, 129, 0.3);
-            color: var(--accent-emerald);
+        .student-card:hover {
+            border-color: var(--card-accent);
         }
 
-        .modal-header h2 {
-            font-size: 28px;
-            font-weight: 700;
-            margin-bottom: 8px;
-            background: linear-gradient(135deg, var(--text-primary), var(--text-secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .modal-header p {
-            color: var(--text-muted);
-            font-size: 14px;
-        }
-
-        .form-group {
-            margin-bottom: 24px;
-        }
-
-        .form-group label {
-            display: block;
-            font-size: 12px;
-            font-weight: 600;
-            color: var(--text-muted);
-            margin-bottom: 10px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .form-group input {
-            width: 100%;
-            padding: 16px 20px;
-            background: rgba(0, 0, 0, 0.4);
-            border: 1px solid var(--border-color);
-            border-radius: 14px;
-            color: var(--text-primary);
-            font-family: 'Outfit', sans-serif;
-            font-size: 16px;
-            transition: all 0.3s ease;
-        }
-
-        .form-group input:focus {
-            outline: none;
-            border-color: var(--accent-cyan);
-            box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.1), 0 0 20px rgba(6, 182, 212, 0.1);
-        }
-
-        .form-group input::placeholder {
-            color: var(--text-muted);
-        }
-
-        .code-input {
-            font-family: 'JetBrains Mono', monospace;
-            letter-spacing: 12px;
-            text-align: center;
-            font-size: 22px !important;
-            font-weight: 700;
-            text-transform: uppercase;
-        }
-
-        .room-code-box {
-            text-align: center;
-            padding: 32px;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 20px;
-            margin-bottom: 28px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .room-code-box::before {
-            content: '';
+        .card-number {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 4.5rem;
+            line-height: 1;
+            color: var(--card-accent);
+            opacity: 0.18;
             position: absolute;
-            inset: 0;
-            background: linear-gradient(90deg, transparent, rgba(6, 182, 212, 0.05), transparent);
-            animation: shimmer 2s infinite;
+            top: 1rem;
+            right: 1.4rem;
+            letter-spacing: -0.02em;
+            transition: opacity 0.3s;
         }
 
-        @keyframes shimmer {
-            0% {
-                transform: translateX(-100%);
-            }
-
-            100% {
-                transform: translateX(100%);
-            }
-        }
-
-        .code-label {
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 3px;
-            color: var(--text-muted);
-            margin-bottom: 16px;
-        }
-
-        .code-value {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 48px;
-            font-weight: 800;
-            letter-spacing: 12px;
-            color: var(--accent-cyan);
-            text-shadow: 0 0 40px var(--glow-cyan);
-            margin-bottom: 20px;
-        }
-
-        .copy-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            padding: 12px 24px;
-            background: rgba(6, 182, 212, 0.1);
-            border: 1px solid rgba(6, 182, 212, 0.3);
-            border-radius: 12px;
-            color: var(--accent-cyan);
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .copy-btn:hover {
-            background: rgba(6, 182, 212, 0.2);
-            transform: scale(1.05);
-        }
-
-        .copy-btn.copied {
-            background: rgba(16, 185, 129, 0.2);
-            border-color: rgba(16, 185, 129, 0.4);
-            color: var(--accent-emerald);
-        }
-
-        /* Room Screen (Video) */
-        #room-screen.active {
-            max-width: 900px;
-        }
-
-        .room-main {
-            width: 100%;
-        }
-
-        .room-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px 24px;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .room-info-header {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-
-        .room-code-badge {
-            padding: 8px 16px;
-            background: rgba(6, 182, 212, 0.1);
-            border: 1px solid rgba(6, 182, 212, 0.3);
-            border-radius: 20px;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--accent-cyan);
-        }
-
-        .user-badge {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 14px;
-            background: rgba(139, 92, 246, 0.1);
-            border: 1px solid rgba(139, 92, 246, 0.3);
-            border-radius: 20px;
-            font-size: 13px;
-        }
-
-        .user-badge.host {
-            background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(6, 182, 212, 0.15));
-            border-color: rgba(139, 92, 246, 0.4);
-            color: var(--accent-violet);
-        }
-
-        .video-section {
-            padding: 24px;
-        }
-
-        .video-container {
-            position: relative;
-            width: 100%;
-            padding-top: 56.25%;
-            background: #000;
-            border-radius: 16px;
-            overflow: hidden;
-            margin-bottom: 20px;
-        }
-
-        .video-container iframe {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
-
-        .video-placeholder {
-            position: absolute;
-            inset: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(135deg, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.6));
-        }
-
-        .video-placeholder svg {
-            width: 64px;
-            height: 64px;
-            color: var(--text-muted);
-            margin-bottom: 16px;
-        }
-
-        .video-placeholder p {
-            color: var(--text-muted);
-            font-size: 15px;
-        }
-
-        .link-input-section {
-            margin-bottom: 20px;
-        }
-
-        .link-input-group {
-            display: flex;
-            gap: 10px;
-        }
-
-        .link-input-group input {
-            flex: 1;
-        }
-
-        .link-input-group .btn {
-            white-space: nowrap;
-        }
-
-        .participants-sidebar {
-            padding: 20px;
-            border-top: 1px solid var(--border-color);
-        }
-
-        .participants-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 16px;
-        }
-
-        .participants-header h3 {
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .participants-header span {
-            color: var(--accent-cyan);
-            font-weight: 700;
-        }
-
-        .participants-list {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .participant-card {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px;
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 12px;
-        }
-
-        .participant-avatar {
-            width: 36px;
-            height: 36px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            font-size: 14px;
-        }
-
-        .participant-name {
-            font-weight: 600;
-            font-size: 14px;
-            flex: 1;
-        }
-
-        .participant-role {
-            font-size: 10px;
-            font-weight: 600;
-            padding: 4px 10px;
-            border-radius: 12px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .participant-role.host {
-            background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(6, 182, 212, 0.2));
-            color: var(--accent-violet);
-        }
-
-        .participant-role.viewer {
-            background: rgba(255, 255, 255, 0.05);
-            color: var(--text-muted);
-        }
-
-        .room-actions {
-            display: flex;
-            justify-content: center;
-            padding: 16px;
-            border-top: 1px solid var(--border-color);
-        }
-
-        .particle {
-            position: fixed;
-            width: 4px;
-            height: 4px;
-            background: var(--accent-cyan);
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: 0;
-            animation: particleFloat 15s infinite;
+        .student-card:hover .card-number {
             opacity: 0.3;
         }
 
-        @keyframes particleFloat {
-            0% {
-                transform: translateY(100vh) rotate(0deg);
+        .card-icon {
+            width: 52px;
+            height: 52px;
+            border-radius: 14px;
+            background: color-mix(in srgb, var(--card-accent) 15%, transparent);
+            border: 1px solid color-mix(in srgb, var(--card-accent) 30%, transparent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 1.2rem;
+            transition: transform 0.3s;
+        }
+
+        .student-card:hover .card-icon {
+            transform: rotate(-5deg) scale(1.1);
+        }
+
+        .card-name {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 2rem;
+            letter-spacing: 0.05em;
+            color: var(--text);
+            margin-bottom: 0.3rem;
+        }
+
+        .card-label {
+            font-size: 0.78rem;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-weight: 500;
+        }
+
+        .card-arrow {
+            position: absolute;
+            bottom: 1.4rem;
+            right: 1.4rem;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: color-mix(in srgb, var(--card-accent) 20%, transparent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+            color: var(--card-accent);
+            transform: translateX(-4px);
+            opacity: 0;
+            transition: transform 0.3s, opacity 0.3s;
+        }
+
+        .student-card:hover .card-arrow {
+            transform: translateX(0);
+            opacity: 1;
+        }
+
+        /* ── PASSWORD MODAL ── */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(5, 5, 15, 0.85);
+            backdrop-filter: blur(12px);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.25s ease;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from {
                 opacity: 0;
             }
 
-            10% {
-                opacity: 0.3;
+            to {
+                opacity: 1;
             }
+        }
 
-            90% {
-                opacity: 0.3;
-            }
+        .modal-box {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 2.8rem 2.4rem;
+            width: 100%;
+            max-width: 420px;
+            margin: 1rem;
+            position: relative;
+            animation: modalIn 0.4s cubic-bezier(.23, 1, .32, 1) both;
+            overflow: hidden;
+        }
 
-            100% {
-                transform: translateY(-100px) rotate(720deg);
+        .modal-box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--modal-accent, var(--accent1)), transparent);
+        }
+
+        @keyframes modalIn {
+            from {
                 opacity: 0;
+                transform: scale(0.92) translateY(20px);
             }
+
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--border);
+            border: none;
+            cursor: pointer;
+            color: var(--muted);
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s, color 0.2s;
+        }
+
+        .modal-close:hover {
+            background: var(--accent2);
+            color: white;
+        }
+
+        .modal-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 18px;
+            background: color-mix(in srgb, var(--modal-accent, var(--accent1)) 15%, transparent);
+            border: 1px solid color-mix(in srgb, var(--modal-accent, var(--accent1)) 30%, transparent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            margin-bottom: 1.3rem;
+        }
+
+        .modal-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 2rem;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.3rem;
+        }
+
+        .modal-sub {
+            font-size: 0.85rem;
+            color: var(--muted);
+            margin-bottom: 1.8rem;
+        }
+
+        .input-group {
+            position: relative;
+            margin-bottom: 1.2rem;
+        }
+
+        .input-group input {
+            width: 100%;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 0.9rem 1.2rem 0.9rem 3rem;
+            font-family: 'DM Mono', monospace;
+            font-size: 1rem;
+            color: var(--text);
+            outline: none;
+            transition: border-color 0.25s, box-shadow 0.25s;
+            letter-spacing: 0.1em;
+        }
+
+        .input-group input:focus {
+            border-color: var(--modal-accent, var(--accent1));
+            box-shadow: 0 0 0 3px color-mix(in srgb, var(--modal-accent, var(--accent1)) 15%, transparent);
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--muted);
+            font-size: 1rem;
+            pointer-events: none;
+        }
+
+        .toggle-pw {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--muted);
+            font-size: 0.9rem;
+            padding: 0.2rem;
+            transition: color 0.2s;
+        }
+
+        .toggle-pw:hover {
+            color: var(--text);
+        }
+
+        .error-msg {
+            font-size: 0.82rem;
+            color: var(--accent2);
+            margin-bottom: 1rem;
+            display: none;
+            padding: 0.6rem 0.9rem;
+            background: color-mix(in srgb, var(--accent2) 12%, transparent);
+            border-radius: 8px;
+            border: 1px solid color-mix(in srgb, var(--accent2) 25%, transparent);
+            animation: shake 0.4s ease;
+        }
+
+        .error-msg.show {
+            display: block;
         }
 
         @keyframes shake {
@@ -807,718 +493,861 @@
                 transform: translateX(0);
             }
 
-            20% {
+            25% {
                 transform: translateX(-8px);
             }
 
-            40% {
-                transform: translateX(8px);
-            }
-
-            60% {
-                transform: translateX(-8px);
-            }
-
-            80% {
+            75% {
                 transform: translateX(8px);
             }
         }
 
-        @media (max-width: 768px) {
-            .room-header {
-                flex-direction: column;
-                gap: 12px;
+        .btn-primary {
+            width: 100%;
+            padding: 0.95rem;
+            background: var(--modal-accent, var(--accent1));
+            border: none;
+            border-radius: 12px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            color: white;
+            cursor: pointer;
+            letter-spacing: 0.03em;
+            transition: opacity 0.2s, transform 0.2s, box-shadow 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, transparent 60%);
+            pointer-events: none;
+        }
+
+        .btn-primary:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+            box-shadow: 0 8px 24px color-mix(in srgb, var(--modal-accent, var(--accent1)) 40%, transparent);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* ── NOTES SCREEN ── */
+        #screen-notes {
+            display: none;
+            min-height: 100vh;
+            padding: 2rem;
+            animation: fadeIn 0.5s ease both;
+        }
+
+        #screen-notes.active {
+            display: block;
+        }
+
+        .notes-header {
+            max-width: 900px;
+            margin: 0 auto 2.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .notes-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.9rem;
+        }
+
+        .notes-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            font-weight: 700;
+        }
+
+        .notes-user {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.6rem;
+            letter-spacing: 0.05em;
+        }
+
+        .notes-tagline {
+            font-size: 0.8rem;
+            color: var(--muted);
+        }
+
+        .btn-logout {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 0.6rem 1.2rem;
+            color: var(--muted);
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: border-color 0.2s, color 0.2s, background 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-logout:hover {
+            border-color: var(--accent2);
+            color: var(--accent2);
+            background: color-mix(in srgb, var(--accent2) 8%, transparent);
+        }
+
+        /* ── NOTES AREA ── */
+        .notes-container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .notes-toolbar {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .btn-new-note {
+            background: var(--user-accent, var(--accent1));
+            border: none;
+            border-radius: 10px;
+            padding: 0.65rem 1.3rem;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: white;
+            cursor: pointer;
+            transition: opacity 0.2s, transform 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-new-note:hover {
+            opacity: 0.88;
+            transform: translateY(-1px);
+        }
+
+        .search-bar {
+            flex: 1;
+            min-width: 180px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 0.65rem 1rem 0.65rem 2.5rem;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.9rem;
+            color: var(--text);
+            outline: none;
+            transition: border-color 0.2s;
+            position: relative;
+        }
+
+        .search-wrap {
+            position: relative;
+            flex: 1;
+            min-width: 180px;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 0.8rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--muted);
+            font-size: 0.85rem;
+            pointer-events: none;
+        }
+
+        .search-bar:focus {
+            border-color: var(--user-accent, var(--accent1));
+        }
+
+        /* ── NOTE EDITOR ── */
+        .note-editor {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 1.8rem;
+            margin-bottom: 1.5rem;
+            display: none;
+            animation: slideDown 0.3s cubic-bezier(.23, 1, .32, 1);
+        }
+
+        .note-editor.open {
+            display: block;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-12px);
             }
 
-            .link-input-group {
-                flex-direction: column;
+            to {
+                opacity: 1;
+                transform: translateY(0);
             }
+        }
 
-            .link-input-group .btn {
-                width: 100%;
+        .editor-title-input {
+            width: 100%;
+            background: none;
+            border: none;
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.6rem;
+            color: var(--text);
+            outline: none;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 0.8rem;
+        }
+
+        .editor-title-input::placeholder {
+            color: var(--muted);
+        }
+
+        .editor-body-input {
+            width: 100%;
+            background: none;
+            border: none;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.95rem;
+            color: var(--text);
+            outline: none;
+            resize: vertical;
+            min-height: 140px;
+            line-height: 1.7;
+        }
+
+        .editor-body-input::placeholder {
+            color: var(--muted);
+        }
+
+        .editor-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.7rem;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .btn-cancel {
+            background: none;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.5rem 1.1rem;
+            color: var(--muted);
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.88rem;
+            cursor: pointer;
+            transition: border-color 0.2s, color 0.2s;
+        }
+
+        .btn-cancel:hover {
+            border-color: var(--muted);
+            color: var(--text);
+        }
+
+        .btn-save {
+            background: var(--user-accent, var(--accent1));
+            border: none;
+            border-radius: 8px;
+            padding: 0.5rem 1.3rem;
+            color: white;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.88rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .btn-save:hover {
+            opacity: 0.88;
+        }
+
+        /* ── NOTES LIST ── */
+        .notes-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 1rem;
+        }
+
+        .note-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.4rem;
+            cursor: pointer;
+            transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+            position: relative;
+            overflow: hidden;
+            animation: cardIn 0.4s cubic-bezier(.23, 1, .32, 1) both;
+        }
+
+        .note-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--user-accent, var(--accent1));
+            opacity: 0.5;
+        }
+
+        .note-card:hover {
+            border-color: var(--user-accent, var(--accent1));
+            transform: translateY(-3px);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+        }
+
+        .note-card-title {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.05rem;
+            margin-bottom: 0.5rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .note-card-body {
+            font-size: 0.83rem;
+            color: var(--muted);
+            line-height: 1.6;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+
+        .note-card-meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .note-card-date {
+            font-size: 0.75rem;
+            color: var(--muted);
+            font-family: 'DM Mono', monospace;
+        }
+
+        .btn-delete-note {
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            background: none;
+            border: 1px solid var(--border);
+            color: var(--muted);
+            cursor: pointer;
+            font-size: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s, color 0.2s, border-color 0.2s;
+        }
+
+        .btn-delete-note:hover {
+            background: color-mix(in srgb, var(--accent2) 15%, transparent);
+            border-color: var(--accent2);
+            color: var(--accent2);
+        }
+
+        .empty-state {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--muted);
+        }
+
+        .empty-state .empty-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.4;
+        }
+
+        .empty-state p {
+            font-size: 0.95rem;
+        }
+
+        /* ── LOADING ── */
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+            display: inline-block;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
             }
+        }
+
+        .loading-notes {
+            grid-column: 1/-1;
+            display: flex;
+            justify-content: center;
+            padding: 3rem;
+        }
+
+        .loading-notes .spinner {
+            border-top-color: var(--user-accent, var(--accent1));
+            border-color: color-mix(in srgb, var(--user-accent, var(--accent1)) 20%, transparent);
+        }
+
+        /* ── STATUS TOAST ── */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            z-index: 999;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 0.9rem 1.4rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transform: translateY(8px);
+            opacity: 0;
+            transition: transform 0.3s, opacity 0.3s;
+            max-width: 300px;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .toast.success {
+            border-left: 3px solid var(--accent3);
+        }
+
+        .toast.error {
+            border-left: 3px solid var(--accent2);
         }
     </style>
 </head>
 
 <body>
-    <div class="bg-grid"></div>
-    <div class="gradient-orb orb-1"></div>
-    <div class="gradient-orb orb-2"></div>
-    <div class="gradient-orb orb-3"></div>
-    <div id="particles"></div>
 
-    <div class="app-container">
-        <!-- Welcome Screen -->
-        <div id="welcome-screen" class="screen active">
-            <div class="glass-card welcome-content">
-                <div class="logo-wrapper">
-                    <div class="logo-glow"></div>
-                    <div class="logo-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2">
-                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                        </svg>
-                    </div>
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+
+    <div id="app">
+
+        <!-- ══ LANDING ══ -->
+        <div id="screen-landing">
+            <h1 class="site-title">NoteVault</h1>
+            <p class="site-subtitle">Your private space to think, write & remember</p>
+
+            <div class="student-grid">
+                <div class="student-card" onclick="openModal('waleed1')">
+                    <div class="card-number">01</div>
+                    <div class="card-icon">📚</div>
+                    <div class="card-name">Waleed 1</div>
+                    <div class="card-label">Student Vault</div>
+                    <div class="card-arrow">→</div>
                 </div>
-                <h1 class="logo-text">SHITBOX</h1>
-                <p class="tagline">Watch videos together in real-time</p>
-
-                <div class="action-buttons">
-                    <button id="create-room-btn" class="btn btn-primary">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2">
-                            <path d="M12 5v14M5 12h14" />
-                        </svg>
-                        Create Room
-                    </button>
-                    <button id="join-room-btn" class="btn btn-secondary">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2">
-                            <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3" />
-                        </svg>
-                        Join Room
-                    </button>
+                <div class="student-card" onclick="openModal('waleed2')">
+                    <div class="card-number">02</div>
+                    <div class="card-icon">✏️</div>
+                    <div class="card-name">Waleed 2</div>
+                    <div class="card-label">Student Vault</div>
+                    <div class="card-arrow">→</div>
+                </div>
+                <div class="student-card" onclick="openModal('waleed3')">
+                    <div class="card-number">03</div>
+                    <div class="card-icon">🔬</div>
+                    <div class="card-name">Waleed 3</div>
+                    <div class="card-label">Student Vault</div>
+                    <div class="card-arrow">→</div>
                 </div>
             </div>
         </div>
 
-        <!-- Create Room Screen -->
-        <div id="create-room-screen" class="screen">
-            <div class="glass-card modal-card">
-                <button class="back-btn" id="back-from-create">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2">
-                        <path d="M19 12H5M12 19l-7-7 7-7" />
-                    </svg>
-                </button>
-
-                <div class="modal-header">
-                    <div class="modal-icon create-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2">
-                            <path d="M12 5v14M5 12h14" />
-                        </svg>
-                    </div>
-                    <h2>Create New Room</h2>
-                    <p>Start a watching session</p>
+        <!-- ══ PASSWORD MODAL ══ -->
+        <div class="modal-overlay" id="modal-pw">
+            <div class="modal-box" id="modal-box">
+                <button class="modal-close" onclick="closeModal()">✕</button>
+                <div class="modal-icon" id="modal-icon">🔒</div>
+                <div class="modal-title" id="modal-title">Enter Password</div>
+                <div class="modal-sub" id="modal-sub">This vault is password protected.</div>
+                <div class="input-group">
+                    <span class="input-icon">🔑</span>
+                    <input type="password" id="pw-input" placeholder="Password" autocomplete="current-password"
+                        onkeydown="if(event.key==='Enter') verifyPassword()" />
+                    <button class="toggle-pw" onclick="togglePw()" title="Show/hide">👁</button>
                 </div>
-
-                <div class="form-group">
-                    <label>Your Name</label>
-                    <input type="text" id="create-name" placeholder="Enter your name..." maxlength="20">
-                </div>
-
-                <button id="generate-room-btn" class="btn btn-primary full-width">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2">
-                        <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8" />
-                        <path d="M21 3v5h-5" />
-                    </svg>
-                    Generate Room Code
-                </button>
+                <div class="error-msg" id="pw-error">Incorrect password. Try again.</div>
+                <button class="btn-primary" id="btn-unlock" onclick="verifyPassword()">Unlock Vault</button>
             </div>
         </div>
 
-        <!-- Join Room Screen -->
-        <div id="join-room-screen" class="screen">
-            <div class="glass-card modal-card">
-                <button class="back-btn" id="back-from-join">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2">
-                        <path d="M19 12H5M12 19l-7-7 7-7" />
-                    </svg>
-                </button>
-
-                <div class="modal-header">
-                    <div class="modal-icon join-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2">
-                            <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3" />
-                        </svg>
+        <!-- ══ NOTES SCREEN ══ -->
+        <div id="screen-notes">
+            <div class="notes-header">
+                <div class="notes-brand">
+                    <div class="notes-avatar" id="notes-avatar">W</div>
+                    <div>
+                        <div class="notes-user" id="notes-username">Waleed</div>
+                        <div class="notes-tagline">Private Notes Vault</div>
                     </div>
-                    <h2>Join Room</h2>
-                    <p>Enter the room code to join</p>
+                </div>
+                <button class="btn-logout" onclick="logout()">⬅ Exit Vault</button>
+            </div>
+
+            <div class="notes-container">
+                <div class="notes-toolbar">
+                    <button class="btn-new-note" id="btn-new" onclick="toggleEditor()">＋ New Note</button>
+                    <div class="search-wrap">
+                        <span class="search-icon">🔍</span>
+                        <input class="search-bar" type="text" placeholder="Search notes…"
+                            oninput="filterNotes(this.value)" />
+                    </div>
                 </div>
 
-                <div class="form-group">
-                    <label>Your Name</label>
-                    <input type="text" id="join-name" placeholder="Enter your name..." maxlength="20">
+                <!-- Editor -->
+                <div class="note-editor" id="note-editor">
+                    <input class="editor-title-input" id="editor-title" placeholder="Note title…" maxlength="120" />
+                    <textarea class="editor-body-input" id="editor-body" placeholder="Write your note here…"></textarea>
+                    <div class="editor-actions">
+                        <button class="btn-cancel" onclick="cancelEdit()">Cancel</button>
+                        <button class="btn-save" id="btn-save" onclick="saveNote()">Save Note</button>
+                    </div>
                 </div>
 
-                <div class="form-group">
-                    <label>Room Code</label>
-                    <input type="text" id="room-code-input" placeholder="XXXXXX" maxlength="6" class="code-input">
+                <!-- Notes List -->
+                <div class="notes-list" id="notes-list">
+                    <div class="loading-notes">
+                        <div class="spinner"></div>
+                    </div>
                 </div>
-
-                <button id="join-btn" class="btn btn-primary full-width">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2">
-                        <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3" />
-                    </svg>
-                    Join Room
-                </button>
             </div>
         </div>
 
-        <!-- Room Created Screen -->
-        <div id="room-created-screen" class="screen">
-            <div class="glass-card modal-card">
-                <div class="modal-header">
-                    <div class="modal-icon success-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2">
-                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                            <polyline points="22 4 12 14.01 9 11.01" />
-                        </svg>
-                    </div>
-                    <h2>Room Created!</h2>
-                    <p>Share this code with others</p>
-                </div>
-
-                <div class="room-code-box">
-                    <div class="code-label">Room Code</div>
-                    <div class="code-value" id="generated-code">------</div>
-                    <button class="copy-btn" id="copy-code-btn">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2">
-                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-                        </svg>
-                        <span>Copy Code</span>
-                    </button>
-                </div>
-
-                <button id="enter-room-btn" class="btn btn-primary full-width">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2">
-                        <path d="M5 12h14M12 5l7 7-7 7" />
-                    </svg>
-                    Enter Room
-                </button>
-            </div>
-        </div>
-
-        <!-- Room/Video Screen -->
-        <div id="room-screen" class="screen">
-            <div class="glass-card room-main">
-                <div class="room-header">
-                    <div class="room-info-header">
-                        <div class="room-code-badge" id="room-code-display">------</div>
-                        <div class="user-badge host" id="user-badge">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                                <circle cx="12" cy="7" r="4" />
-                            </svg>
-                            <span id="user-name-display">User</span>
-                        </div>
-                    </div>
-                    <button id="leave-room-btn" class="btn btn-danger btn-small">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2">
-                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-                            <polyline points="16 17 21 12 16 7" />
-                            <line x1="21" y1="12" x2="9" y2="12" />
-                        </svg>
-                        Leave
-                    </button>
-                </div>
-
-                <div class="video-section">
-                    <!-- Host: Link Input -->
-                    <div class="link-input-section" id="host-controls">
-                        <div class="link-input-group">
-                            <input type="text" id="video-link-input" placeholder="Paste YouTube URL here...">
-                            <button id="load-video-btn" class="btn btn-primary btn-small">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
-                                    fill="none" stroke="currentColor" stroke-width="2">
-                                    <polygon points="5 3 19 12 5 21 5 3" />
-                                </svg>
-                                Load
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Viewer: Notice -->
-                    <div class="link-input-section" id="viewer-notice" style="display: none;">
-                        <div style="display: flex; flex-direction: column; gap: 10px;">
-                            <p
-                                style="color: var(--text-muted); font-size: 14px; text-align: center; padding: 12px; background: rgba(0,0,0,0.2); border-radius: 12px;">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
-                                    fill="none" stroke="currentColor" stroke-width="2"
-                                    style="vertical-align: middle; margin-right: 6px;">
-                                    <circle cx="12" cy="12" r="10" />
-                                    <line x1="12" y1="16" x2="12" y2="12" />
-                                    <line x1="12" y1="8" x2="12.01" y2="8" />
-                                </svg>
-                                Host controls the video
-                            </p>
-                            <button id="sync-with-host-btn" class="btn btn-secondary btn-small full-width">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
-                                    fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M21 2v6h-6" />
-                                    <path d="M3 12a9 9 0 0 1 15-6.7L21 8" />
-                                    <path d="M3 22v-6h6" />
-                                    <path d="M21 12a9 9 0 0 1-15 6.7L3 16" />
-                                </svg>
-                                Sync with Host
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Video Player -->
-                    <div class="video-container" id="video-container">
-                        <div class="video-placeholder" id="video-placeholder">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="1.5">
-                                <rect x="2" y="4" width="20" height="16" rx="2" />
-                                <polygon points="10 8 16 12 10 16 10 8" />
-                            </svg>
-                            <p id="video-placeholder-text">Waiting for host to load a video...</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="participants-sidebar">
-                    <div class="participants-header">
-                        <h3>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="2"
-                                style="vertical-align: middle; margin-right: 6px;">
-                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                                <circle cx="9" cy="7" r="4" />
-                                <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
-                            </svg>
-                            Participants
-                        </h3>
-                        <span id="participant-count">0</span>
-                    </div>
-                    <div class="participants-list" id="participants-list"></div>
-                </div>
-
-                <div class="room-actions">
-                    <button id="copy-room-code-btn" class="btn btn-secondary btn-small">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2">
-                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-                        </svg>
-                        Copy Room Code
-                    </button>
-                </div>
-            </div>
-        </div>
     </div>
 
+    <!-- TOAST -->
+    <div class="toast" id="toast"></div>
+
     <script>
-        let currentRoomCode = null;
-        let currentUserName = null;
-        let isHost = false;
-        let currentVideoUrl = null;
-        let supabaseClient = null;
-        let channel = null;
-        let player = null;
-        let isSyncing = false;
+        // ════════════════════════════════════════════
+        //  SUPABASE CONFIGURATION
+        //  → Replace the two values below with your
+        //    own Supabase project URL and anon key.
+        //  → Then run this SQL in the Supabase SQL editor:
+        /*
+          create table notes (
+            id          uuid primary key default gen_random_uuid(),
+            student_id  text not null,
+            title       text not null,
+            body        text,
+            created_at  timestamptz default now(),
+            updated_at  timestamptz default now()
+          );
+        
+          -- Enable Row Level Security
+          alter table notes enable row level security;
+        
+          -- Allow full access with anon key (since we do app-level auth)
+          create policy "allow all" on notes for all using (true);
+        */
+        // ════════════════════════════════════════════
 
-        // --- Supabase Config ---
-        const SUPABASE_URL = 'https://ejwqhywmmkhbvpuroowm.supabase.co'; // <-- Replace with your URL
-        const SUPABASE_ANON_KEY = 'sb_publishable_vMG32X-EXlFoZBc98LFTog_Rtr1VgaX'; // <-- Replace with your Key
+        const SUPABASE_URL = 'https://ejwqhywmmkhbvpuroowm.supabase.co';   // ← replace
+        const SUPABASE_ANON = 'sb_publishable_vMG32X-EXlFoZBc98LFTog_Rtr1VgaX';                       // ← replace
 
-        try {
-            supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        } catch (e) {
-            console.warn('Supabase init failed, using demo mode:', e);
-            supabaseClient = null;
+        const { createClient } = supabase;
+        const db = createClient(SUPABASE_URL, SUPABASE_ANON);
+
+        // ── STUDENT CONFIG ──
+        const STUDENTS = {
+            waleed1: { name: 'Waleed 1', password: 'admin', icon: '📚', accent: '#7b61ff', glow: 'rgba(123,97,255,0.2)' },
+            waleed2: { name: 'Waleed 2', password: 'admin', icon: '✏️', accent: '#ff6b6b', glow: 'rgba(255,107,107,0.2)' },
+            waleed3: { name: 'Waleed 3', password: 'admin', icon: '🔬', accent: '#00d9a3', glow: 'rgba(0,217,163,0.2)' },
+        };
+
+        // ── STATE ──
+        let currentStudent = null;
+        let allNotes = [];
+        let editingId = null;
+
+        // ── MODAL ──
+        function openModal(id) {
+            currentStudent = id;
+            const s = STUDENTS[id];
+            document.getElementById('modal-icon').textContent = s.icon;
+            document.getElementById('modal-title').textContent = s.name;
+            document.getElementById('modal-sub').textContent = `Enter the password for ${s.name}'s vault.`;
+            document.getElementById('modal-box').style.setProperty('--modal-accent', s.accent);
+            document.getElementById('pw-input').value = '';
+            document.getElementById('pw-error').classList.remove('show');
+            document.getElementById('modal-pw').classList.add('active');
+            setTimeout(() => document.getElementById('pw-input').focus(), 200);
         }
 
-        // --- YouTube API Setup ---
-        const tag = document.createElement('script');
-        tag.src = "https://www.youtube.com/iframe_api";
-        const firstScriptTag = document.getElementsByTagName('script')[0];
-        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-
-        function onYouTubeIframeAPIReady() {
-            // Player will be initialized when video is loaded
-            console.log('YouTube API Ready');
+        function closeModal() {
+            document.getElementById('modal-pw').classList.remove('active');
+            currentStudent = null;
         }
 
-        function createParticles() {
-            const container = document.getElementById('particles');
-            const colors = ['#06b6d4', '#8b5cf6', '#10b981', '#f59e0b', '#ec4899'];
-            for (let i = 0; i < 20; i++) {
-                const particle = document.createElement('div');
-                particle.className = 'particle';
-                particle.style.left = Math.random() * 100 + 'vw';
-                particle.style.background = colors[Math.floor(Math.random() * colors.length)];
-                particle.style.animationDelay = Math.random() * 15 + 's';
-                particle.style.animationDuration = (15 + Math.random() * 10) + 's';
-                container.appendChild(particle);
-            }
+        function togglePw() {
+            const inp = document.getElementById('pw-input');
+            inp.type = inp.type === 'password' ? 'text' : 'password';
         }
 
-        function generateRoomCode() {
-            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-            let code = '';
-            for (let i = 0; i < 6; i++) code += chars.charAt(Math.floor(Math.random() * chars.length));
-            return code;
-        }
-
-        function showScreen(screenId) {
-            const currentScreen = document.querySelector('.screen.active');
-            const nextScreen = document.getElementById(screenId);
-            if (currentScreen) {
-                currentScreen.style.animation = 'screenOut 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards';
+        function verifyPassword() {
+            const val = document.getElementById('pw-input').value.trim();
+            const err = document.getElementById('pw-error');
+            const btn = document.getElementById('btn-unlock');
+            if (!currentStudent) return;
+            if (val === STUDENTS[currentStudent].password) {
+                err.classList.remove('show');
+                btn.innerHTML = '<span class="spinner"></span>';
+                btn.disabled = true;
                 setTimeout(() => {
-                    currentScreen.classList.remove('active');
-                    currentScreen.style.animation = '';
-                    nextScreen.classList.add('active');
-                }, 300);
+                    btn.innerHTML = 'Unlock Vault';
+                    btn.disabled = false;
+                    closeModal();
+                    enterVault(currentStudent);
+                }, 600);
             } else {
-                nextScreen.classList.add('active');
+                err.classList.remove('show');
+                void err.offsetWidth; // reflow for re-animation
+                err.classList.add('show');
+                document.getElementById('pw-input').value = '';
+                document.getElementById('pw-input').focus();
             }
         }
 
-        function shakeInput(input) {
-            input.style.animation = 'shake 0.5s ease';
-            setTimeout(() => input.style.animation = '', 500);
+        // ── VAULT ──
+        function enterVault(id) {
+            const s = STUDENTS[id];
+            currentStudent = id;
+
+            // Apply accent
+            document.documentElement.style.setProperty('--user-accent', s.accent);
+
+            // Avatar
+            const av = document.getElementById('notes-avatar');
+            av.textContent = s.icon;
+            av.style.background = `color-mix(in srgb, ${s.accent} 18%, transparent)`;
+            av.style.border = `1px solid color-mix(in srgb, ${s.accent} 35%, transparent)`;
+
+            document.getElementById('notes-username').textContent = s.name;
+            document.getElementById('screen-landing').style.display = 'none';
+            document.getElementById('screen-notes').classList.add('active');
+            cancelEdit();
+            loadNotes();
         }
 
-        function createRoom() {
-            const nameInput = document.getElementById('create-name');
-            const name = nameInput.value.trim();
-            if (!name) { shakeInput(nameInput); return; }
-
-            currentUserName = name;
-            currentRoomCode = generateRoomCode();
-            isHost = true;
-
-            document.getElementById('generated-code').textContent = currentRoomCode;
-            showScreen('room-created-screen');
+        function logout() {
+            currentStudent = null;
+            allNotes = [];
+            document.getElementById('screen-notes').classList.remove('active');
+            document.getElementById('screen-landing').style.display = 'flex';
+            document.getElementById('notes-list').innerHTML = '<div class="loading-notes"><div class="spinner"></div></div>';
         }
 
-        function joinRoom() {
-            const nameInput = document.getElementById('join-name');
-            const codeInput = document.getElementById('room-code-input');
-
-            const name = nameInput.value.trim();
-            const code = codeInput.value.trim().toUpperCase();
-
-            if (!name) { shakeInput(nameInput); return; }
-            if (!code || code.length !== 6) { shakeInput(codeInput); return; }
-
-            currentUserName = name;
-            currentRoomCode = code;
-            isHost = false;
-
-            enterRoom();
-        }
-
-        let syncInterval = null;
-
-        function startHeartbeat() {
-            if (syncInterval) clearInterval(syncInterval);
-            syncInterval = setInterval(() => {
-                if (player && player.getPlayerState() === YT.PlayerState.PLAYING) {
-                    broadcastEvent('HEARTBEAT', { time: player.getCurrentTime() });
-                }
-            }, 5000);
-        }
-
-        function enterRoom() {
-            document.getElementById('room-code-display').textContent = currentRoomCode;
-            document.getElementById('user-name-display').textContent = currentUserName;
-
-            const userBadge = document.getElementById('user-badge');
-            if (isHost) {
-                userBadge.classList.add('host');
-                userBadge.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><span>${currentUserName}</span>`;
-                document.getElementById('host-controls').style.display = 'block';
-                document.getElementById('viewer-notice').style.display = 'none';
-                startHeartbeat();
-            } else {
-                userBadge.classList.remove('host');
-                userBadge.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>${currentUserName}</span>`;
-                document.getElementById('host-controls').style.display = 'none';
-                document.getElementById('viewer-notice').style.display = 'block';
-            }
-
-            if (supabaseClient) {
-                setupRealtime();
-            } else {
-                // Demo fallback
-                updateParticipants([
-                    { name: currentUserName, is_host: isHost },
-                    { name: 'Alex', is_host: false },
-                    { name: 'Sam', is_host: false }
-                ]);
-            }
-
-            showScreen('room-screen');
-        }
-
-        function setupRealtime() {
+        // ── NOTES CRUD (Supabase) ──
+        async function loadNotes() {
+            document.getElementById('notes-list').innerHTML = '<div class="loading-notes"><div class="spinner"></div></div>';
             try {
-                channel = supabaseClient.channel(`room_${currentRoomCode}`, {
-                    config: {
-                        presence: { key: currentUserName }
-                    }
-                });
-
-                channel
-                    .on('broadcast', { event: 'sync' }, ({ payload }) => {
-                        handleRemoteEvent(payload);
-                    })
-                    .on('presence', { event: 'sync' }, () => {
-                        const state = channel.presenceState();
-                        const participants = [];
-                        for (const key in state) {
-                            state[key].forEach(p => participants.push({ name: key, is_host: p.is_host }));
-                        }
-                        updateParticipants(participants);
-                    })
-                    .subscribe(async (status) => {
-                        if (status === 'SUBSCRIBED') {
-                            await channel.track({ is_host: isHost, joined_at: new Date().toISOString() });
-                            if (!isHost) {
-                                broadcastEvent('REQUEST_SYNC', {});
-                            }
-                        }
-                    });
+                const { data, error } = await db
+                    .from('notes')
+                    .select('*')
+                    .eq('student_id', currentStudent)
+                    .order('updated_at', { ascending: false });
+                if (error) throw error;
+                allNotes = data || [];
+                renderNotes(allNotes);
             } catch (e) {
-                console.warn('Realtime setup failed:', e);
-                supabaseClient = null;
-            }
-        }
-
-        function updateParticipants(participants) {
-            const list = document.getElementById('participants-list');
-            const count = document.getElementById('participant-count');
-            count.textContent = participants.length;
-
-            const colors = ['#06b6d4', '#8b5cf6', '#10b981', '#f59e0b', '#ef4444', '#ec4899'];
-
-            list.innerHTML = participants.map((p, i) => {
-                const initial = p.name.charAt(0).toUpperCase();
-                const color = colors[i % colors.length];
-                const roleClass = p.is_host ? 'host' : 'viewer';
-                const roleText = p.is_host ? 'Host' : 'Viewer';
-
-                return `
-                    <div class="participant-card">
-                        <div class="participant-avatar" style="background: ${color}15; border: 1px solid ${color}30; color: ${color}">${initial}</div>
-                        <span class="participant-name">${p.name}</span>
-                        <span class="participant-role ${roleClass}">${roleText}</span>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        function extractVideoId(url) {
-            // YouTube patterns
-            const patterns = [
-                /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/,
-                /youtube\.com\/v\/([a-zA-Z0-9_-]{11})/,
-                /youtube\.com\/shorts\/([a-zA-Z0-9_-]{11})/
-            ];
-            for (const pattern of patterns) {
-                const match = url.match(pattern);
-                if (match) return match[1];
-            }
-            return null;
-        }
-
-        function onPlayerReady(event) {
-            console.log('Player ready');
-        }
-
-        function onPlayerStateChange(event) {
-            if (!isHost || isSyncing) return;
-
-            const state = event.data;
-            const time = player.getCurrentTime();
-
-            if (state === YT.PlayerState.PLAYING) {
-                broadcastEvent('PLAY', { time });
-            } else if (state === YT.PlayerState.PAUSED) {
-                broadcastEvent('PAUSE', { time });
-            }
-        }
-
-        function broadcastEvent(type, data) {
-            if (!channel) return;
-            channel.send({
-                type: 'broadcast',
-                event: 'sync',
-                payload: { type, ...data, sender: currentUserName }
-            });
-        }
-
-        function handleRemoteEvent(payload) {
-            if (payload.sender === currentUserName) return;
-
-            if (isHost && payload.type === 'REQUEST_SYNC') {
-                if (player) {
-                    const videoUrl = player.getVideoUrl();
-                    const videoId = videoUrl ? extractVideoId(videoUrl) : null;
-                    if (videoId) {
-                        broadcastEvent('LOAD', { videoId });
-                        setTimeout(() => {
-                            broadcastEvent('PLAY', { time: player.getCurrentTime() });
-                        }, 1000);
-                    }
+                console.error(e);
+                // Fallback to localStorage if Supabase not configured
+                const stored = JSON.parse(localStorage.getItem(`notes_${currentStudent}`) || '[]');
+                allNotes = stored;
+                renderNotes(allNotes);
+                if (SUPABASE_URL.includes('YOUR_PROJECT')) {
+                    showToast('ℹ️ Using local storage (Supabase not configured)', 'success');
                 }
+            }
+        }
+
+        async function saveNote() {
+            const title = document.getElementById('editor-title').value.trim();
+            const body = document.getElementById('editor-body').value.trim();
+            if (!title) { document.getElementById('editor-title').focus(); return; }
+
+            const btn = document.getElementById('btn-save');
+            btn.innerHTML = '<span class="spinner"></span>';
+            btn.disabled = true;
+
+            try {
+                if (editingId) {
+                    const { error } = await db.from('notes').update({ title, body, updated_at: new Date().toISOString() }).eq('id', editingId);
+                    if (error) throw error;
+                } else {
+                    const { error } = await db.from('notes').insert({ student_id: currentStudent, title, body });
+                    if (error) throw error;
+                }
+                cancelEdit();
+                await loadNotes();
+                showToast('✅ Note saved!', 'success');
+            } catch (e) {
+                // Fallback localStorage
+                let stored = JSON.parse(localStorage.getItem(`notes_${currentStudent}`) || '[]');
+                if (editingId) {
+                    stored = stored.map(n => n.id === editingId ? { ...n, title, body, updated_at: new Date().toISOString() } : n);
+                } else {
+                    stored.unshift({ id: crypto.randomUUID(), student_id: currentStudent, title, body, created_at: new Date().toISOString(), updated_at: new Date().toISOString() });
+                }
+                localStorage.setItem(`notes_${currentStudent}`, JSON.stringify(stored));
+                allNotes = stored;
+                renderNotes(allNotes);
+                cancelEdit();
+                showToast('✅ Note saved locally!', 'success');
+            }
+
+            btn.innerHTML = 'Save Note';
+            btn.disabled = false;
+        }
+
+        async function deleteNote(id, e) {
+            e.stopPropagation();
+            if (!confirm('Delete this note?')) return;
+            try {
+                const { error } = await db.from('notes').delete().eq('id', id);
+                if (error) throw error;
+                await loadNotes();
+                showToast('🗑️ Note deleted', 'success');
+            } catch {
+                // Fallback
+                let stored = JSON.parse(localStorage.getItem(`notes_${currentStudent}`) || '[]');
+                stored = stored.filter(n => n.id !== id);
+                localStorage.setItem(`notes_${currentStudent}`, JSON.stringify(stored));
+                allNotes = stored;
+                renderNotes(allNotes);
+                showToast('🗑️ Note deleted', 'success');
+            }
+        }
+
+        function editNote(note) {
+            editingId = note.id;
+            document.getElementById('editor-title').value = note.title;
+            document.getElementById('editor-body').value = note.body || '';
+            const editor = document.getElementById('note-editor');
+            editor.classList.add('open');
+            document.getElementById('btn-save').textContent = 'Update Note';
+            document.getElementById('editor-title').focus();
+            editor.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        // ── EDITOR ──
+        function toggleEditor() {
+            editingId = null;
+            const editor = document.getElementById('note-editor');
+            if (editor.classList.contains('open')) { cancelEdit(); return; }
+            editor.classList.add('open');
+            document.getElementById('editor-title').value = '';
+            document.getElementById('editor-body').value = '';
+            document.getElementById('btn-save').textContent = 'Save Note';
+            document.getElementById('editor-title').focus();
+        }
+
+        function cancelEdit() {
+            editingId = null;
+            document.getElementById('note-editor').classList.remove('open');
+            document.getElementById('editor-title').value = '';
+            document.getElementById('editor-body').value = '';
+            document.getElementById('btn-save').textContent = 'Save Note';
+        }
+
+        // ── RENDER ──
+        function renderNotes(notes) {
+            const list = document.getElementById('notes-list');
+            if (!notes.length) {
+                list.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">📝</div>
+        <p>No notes yet. Hit <strong>+ New Note</strong> to get started!</p>
+      </div>`;
                 return;
             }
 
-            if (isHost || !player) return;
-
-            isSyncing = true;
-            if (payload.type === 'PLAY') {
-                player.seekTo(payload.time, true);
-                player.playVideo();
-            } else if (payload.type === 'PAUSE') {
-                player.pauseVideo();
-                player.seekTo(payload.time, true);
-            } else if (payload.type === 'LOAD') {
-                loadVideoInternal(payload.videoId);
-            } else if (payload.type === 'SEEK' || payload.type === 'HEARTBEAT' || payload.type === 'REQUEST_SYNC_REPLY') {
-                const currentTime = player.getCurrentTime();
-                if (Math.abs(currentTime - payload.time) > 1.5 || payload.force) {
-                    player.seekTo(payload.time, true);
-                }
-            }
-            setTimeout(() => { isSyncing = false; }, 500);
+            list.innerHTML = notes.map((n, i) => `
+    <div class="note-card" onclick="editNote(${JSON.stringify(n).split('"').join('&quot;')})" style="animation-delay:${i * 0.05}s">
+      <div class="note-card-title">${escHtml(n.title)}</div>
+      <div class="note-card-body">${escHtml(n.body || 'No content')}</div>
+      <div class="note-card-meta">
+        <span class="note-card-date">${formatDate(n.updated_at)}</span>
+        <button class="btn-delete-note" onclick="deleteNote('${n.id}', event)" title="Delete">🗑</button>
+      </div>
+    </div>
+  `).join('');
         }
 
-        function loadVideo() {
-            const input = document.getElementById('video-link-input');
-            const url = input.value.trim();
-            if (!url) { shakeInput(input); return; }
-
-            const videoId = extractVideoId(url);
-            if (!videoId) { alert('Please enter a valid YouTube URL'); return; }
-
-            loadVideoInternal(videoId);
-            if (isHost) {
-                broadcastEvent('LOAD', { videoId });
-            }
+        function filterNotes(q) {
+            const lq = q.toLowerCase();
+            const filtered = allNotes.filter(n =>
+                n.title.toLowerCase().includes(lq) || (n.body || '').toLowerCase().includes(lq)
+            );
+            renderNotes(filtered);
         }
 
-        function loadVideoInternal(videoId) {
-            const container = document.getElementById('video-container');
-            container.innerHTML = '<div id="player-element"></div>';
-
-            player = new YT.Player('player-element', {
-                height: '100%',
-                width: '100%',
-                videoId: videoId,
-                playerVars: {
-                    'autoplay': 1,
-                    'controls': isHost ? 1 : 0, // Viewers can't control
-                    'disablekb': isHost ? 0 : 1,
-                    'modestbranding': 1,
-                    'rel': 0,
-                    'origin': window.location.origin === "null" || window.location.origin === "file://" ? "http://localhost" : window.location.origin
-                },
-                events: {
-                    'onReady': onPlayerReady,
-                    'onStateChange': onPlayerStateChange
-                }
-            });
-
-            document.getElementById('video-placeholder-text').textContent = 'Video loaded!';
+        // ── UTILS ──
+        function escHtml(s) {
+            return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
         }
 
-        async function copyRoomCode() {
-            try {
-                await navigator.clipboard.writeText(currentRoomCode);
-                const btn = document.getElementById('copy-room-code-btn');
-                btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Copied!';
-                setTimeout(() => {
-                    btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy Room Code';
-                }, 2000);
-            } catch (err) { console.error('Failed to copy'); }
+        function formatDate(iso) {
+            if (!iso) return '';
+            const d = new Date(iso);
+            return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
         }
 
-        function leaveRoom() {
-            if (channel) {
-                channel.unsubscribe();
-                channel = null;
-            }
-            if (syncInterval) {
-                clearInterval(syncInterval);
-                syncInterval = null;
-            }
-            currentRoomCode = null;
-            currentUserName = null;
-            isHost = false;
-            currentVideoUrl = null;
-
-            document.getElementById('create-name').value = '';
-            document.getElementById('join-name').value = '';
-            document.getElementById('room-code-input').value = '';
-            document.getElementById('video-link-input').value = '';
-
-            // Reset video container
-            document.getElementById('video-container').innerHTML = `
-                <div class="video-placeholder" id="video-placeholder">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="4" width="20" height="16" rx="2"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
-                    <p id="video-placeholder-text">Waiting for host to load a video...</p>
-                </div>
-            `;
-
-            showScreen('welcome-screen');
+        let toastTimer;
+        function showToast(msg, type = 'success') {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.className = `toast ${type} show`;
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
         }
 
-        // Event Listeners
-        document.getElementById('create-room-btn').addEventListener('click', () => {
-            showScreen('create-room-screen');
-            setTimeout(() => document.getElementById('create-name').focus(), 400);
+        // Close modal on overlay click
+        document.getElementById('modal-pw').addEventListener('click', function (e) {
+            if (e.target === this) closeModal();
         });
-
-        document.getElementById('join-room-btn').addEventListener('click', () => {
-            showScreen('join-room-screen');
-            setTimeout(() => document.getElementById('join-name').focus(), 400);
-        });
-
-        document.getElementById('back-from-create').addEventListener('click', () => showScreen('welcome-screen'));
-        document.getElementById('back-from-join').addEventListener('click', () => showScreen('welcome-screen'));
-
-        document.getElementById('generate-room-btn').addEventListener('click', createRoom);
-        document.getElementById('join-btn').addEventListener('click', joinRoom);
-
-        document.getElementById('copy-code-btn').addEventListener('click', async () => {
-            const code = document.getElementById('generated-code').textContent;
-            await navigator.clipboard.writeText(code);
-            const btn = document.getElementById('copy-code-btn');
-            btn.classList.add('copied');
-            btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg><span>Copied!</span>';
-            setTimeout(() => {
-                btn.classList.remove('copied');
-                btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><span>Copy Code</span>';
-            }, 2000);
-        });
-
-        document.getElementById('enter-room-btn').addEventListener('click', enterRoom);
-        document.getElementById('leave-room-btn').addEventListener('click', leaveRoom);
-        document.getElementById('load-video-btn').addEventListener('click', loadVideo);
-        document.getElementById('copy-room-code-btn').addEventListener('click', copyRoomCode);
-        document.getElementById('sync-with-host-btn').addEventListener('click', () => {
-            if (channel) broadcastEvent('REQUEST_SYNC', {});
-        });
-
-        document.getElementById('create-name').addEventListener('keypress', (e) => { if (e.key === 'Enter') createRoom(); });
-        document.getElementById('join-name').addEventListener('keypress', (e) => { if (e.key === 'Enter') document.getElementById('room-code-input').focus(); });
-        document.getElementById('room-code-input').addEventListener('keypress', (e) => { if (e.key === 'Enter') joinRoom(); });
-        document.getElementById('video-link-input').addEventListener('keypress', (e) => { if (e.key === 'Enter') loadVideo(); });
-
-        document.getElementById('room-code-input').addEventListener('input', (e) => {
-            e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
-        });
-
-        createParticles();
-        showScreen('welcome-screen');
     </script>
 </body>
 
