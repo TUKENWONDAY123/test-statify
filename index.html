@@ -1125,14 +1125,11 @@
         const SUPABASE_URL = 'https://ejwqhywmmkhbvpuroowm.supabase.co'; // <-- Replace with your URL
         const SUPABASE_ANON_KEY = 'sb_publishable_vMG32X-EXlFoZBc98LFTog_Rtr1VgaX'; // <-- Replace with your Key
 
-        if (SUPABASE_URL !== 'YOUR_SUPABASE_URL') {
-            try {
-                supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-            } catch (e) {
-                console.warn('Supabase init failed, using demo mode:', e);
-                supabaseClient = null;
-            }
-        }
+        try {
+            supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        } catch (e) {
+            console.warn('Supabase init failed, using demo mode:', e);
+            supabaseClient = null;
         }
 
         // --- YouTube API Setup ---
@@ -1292,29 +1289,6 @@
                 console.warn('Realtime setup failed:', e);
                 supabaseClient = null;
             }
-        }
-            });
-
-        channel
-            .on('broadcast', { event: 'sync' }, ({ payload }) => {
-                handleRemoteEvent(payload);
-            })
-            .on('presence', { event: 'sync' }, () => {
-                const state = channel.presenceState();
-                const participants = [];
-                for (const key in state) {
-                    state[key].forEach(p => participants.push({ name: key, is_host: p.is_host }));
-                }
-                updateParticipants(participants);
-            })
-            .subscribe(async (status) => {
-                if (status === 'SUBSCRIBED') {
-                    await channel.track({ is_host: isHost, joined_at: new Date().toISOString() });
-                    if (!isHost) {
-                        broadcastEvent('REQUEST_SYNC', {});
-                    }
-                }
-            });
         }
 
         function updateParticipants(participants) {
