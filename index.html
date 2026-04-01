@@ -1,1811 +1,261 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>NoteVault — Student Notes</title>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;500;600&display=swap"
-        rel="stylesheet" />
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <style>
-        :root {
-            --bg: #0a0a0f;
-            --surface: #111118;
-            --card: #16161f;
-            --border: #2a2a3a;
-            --accent1: #7b61ff;
-            --accent2: #ff6b6b;
-            --accent3: #00d9a3;
-            --gold: #f5c842;
-            --text: #e8e8f0;
-            --muted: #6b6b88;
-            --glow1: rgba(123, 97, 255, 0.18);
-            --glow2: rgba(255, 107, 107, 0.15);
-            --glow3: rgba(0, 217, 163, 0.15);
-        }
-
-        *,
-        *::before,
-        *::after {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            background: var(--bg);
-            color: var(--text);
-            font-family: 'Outfit', sans-serif;
-            min-height: 100vh;
-            overflow-x: hidden;
-        }
-
-        /* ── NOISE OVERLAY ── */
-        body::before {
-            content: '';
-            position: fixed;
-            inset: 0;
-            z-index: 0;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
-            opacity: 0.025;
-            pointer-events: none;
-        }
-
-        /* ── BG BLOBS ── */
-        .blob {
-            position: fixed;
-            border-radius: 50%;
-            filter: blur(80px);
-            pointer-events: none;
-            z-index: 0;
-            animation: blobFloat 8s ease-in-out infinite;
-        }
-
-        .blob-1 {
-            width: 400px;
-            height: 400px;
-            background: var(--glow1);
-            top: -100px;
-            left: -100px;
-            animation-delay: 0s;
-        }
-
-        .blob-2 {
-            width: 300px;
-            height: 300px;
-            background: var(--glow2);
-            bottom: 100px;
-            right: -80px;
-            animation-delay: -3s;
-        }
-
-        .blob-3 {
-            width: 250px;
-            height: 250px;
-            background: var(--glow3);
-            bottom: -80px;
-            left: 30%;
-            animation-delay: -5s;
-        }
-
-        @keyframes blobFloat {
-
-            0%,
-            100% {
-                transform: translateY(0) scale(1);
-            }
-
-            50% {
-                transform: translateY(-30px) scale(1.05);
-            }
-        }
-
-        /* ── LAYOUT ── */
-        #app {
-            position: relative;
-            z-index: 1;
-            min-height: 100vh;
-        }
-
-        /* ── LANDING ── */
-        #screen-landing {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            padding: 2rem;
-            animation: fadeIn 0.8s ease both;
-        }
-
-        .site-title {
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: clamp(3.5rem, 10vw, 7rem);
-            letter-spacing: 0.08em;
-            background: linear-gradient(135deg, #7b61ff 0%, #ff6b6b 50%, #00d9a3 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            line-height: 0.95;
-            text-align: center;
-            margin-bottom: 0.3em;
-            filter: drop-shadow(0 0 40px rgba(123, 97, 255, 0.4));
-        }
-
-        .site-subtitle {
-            font-family: 'DM Serif Display', serif;
-            font-style: italic;
-            font-size: clamp(1rem, 2.5vw, 1.4rem);
-            color: var(--muted);
-            margin-bottom: 4rem;
-            letter-spacing: 0.02em;
-        }
-
-        .student-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 1.5rem;
-            width: 100%;
-            max-width: 820px;
-        }
-
-        @media (max-width: 600px) {
-            .student-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .student-card {
-            position: relative;
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            padding: 2.4rem 1.8rem 2rem;
-            cursor: pointer;
-            overflow: hidden;
-            transition: transform 0.35s cubic-bezier(.23, 1, .32, 1), border-color 0.3s, box-shadow 0.35s;
-            animation: cardIn 0.7s cubic-bezier(.23, 1, .32, 1) both;
-        }
-
-        .student-card:nth-child(1) {
-            animation-delay: 0.15s;
-            --card-accent: var(--accent1);
-            --card-glow: var(--glow1);
-        }
-
-        .student-card:nth-child(2) {
-            animation-delay: 0.28s;
-            --card-accent: var(--accent2);
-            --card-glow: var(--glow2);
-        }
-
-        .student-card:nth-child(3) {
-            animation-delay: 0.41s;
-            --card-accent: var(--accent3);
-            --card-glow: var(--glow3);
-        }
-
-        @keyframes cardIn {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .student-card::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: radial-gradient(circle at 70% 20%, var(--card-glow), transparent 65%);
-            opacity: 0;
-            transition: opacity 0.4s;
-            pointer-events: none;
-        }
-
-        .student-card::after {
-            content: '';
-            position: absolute;
-            inset: -1px;
-            border-radius: 21px;
-            background: linear-gradient(135deg, var(--card-accent), transparent 60%);
-            opacity: 0;
-            transition: opacity 0.3s;
-            z-index: -1;
-        }
-
-        .student-card:hover {
-            transform: translateY(-8px) scale(1.02);
-            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
-        }
-
-        .student-card:hover::before {
-            opacity: 1;
-        }
-
-        .student-card:hover {
-            border-color: var(--card-accent);
-        }
-
-        .card-number {
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: 4.5rem;
-            line-height: 1;
-            color: var(--card-accent);
-            opacity: 0.18;
-            position: absolute;
-            top: 1rem;
-            right: 1.4rem;
-            letter-spacing: -0.02em;
-            transition: opacity 0.3s;
-        }
-
-        .student-card:hover .card-number {
-            opacity: 0.3;
-        }
-
-        .card-icon {
-            width: 52px;
-            height: 52px;
-            border-radius: 14px;
-            background: color-mix(in srgb, var(--card-accent) 15%, transparent);
-            border: 1px solid color-mix(in srgb, var(--card-accent) 30%, transparent);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            margin-bottom: 1.2rem;
-            transition: transform 0.3s;
-        }
-
-        .student-card:hover .card-icon {
-            transform: rotate(-5deg) scale(1.1);
-        }
-
-        .card-name {
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: 2rem;
-            letter-spacing: 0.05em;
-            color: var(--text);
-            margin-bottom: 0.3rem;
-        }
-
-        .card-label {
-            font-size: 0.78rem;
-            color: var(--muted);
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            font-weight: 500;
-        }
-
-        .card-arrow {
-            position: absolute;
-            bottom: 1.4rem;
-            right: 1.4rem;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background: color-mix(in srgb, var(--card-accent) 20%, transparent);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.85rem;
-            color: var(--card-accent);
-            transform: translateX(-4px);
-            opacity: 0;
-            transition: transform 0.3s, opacity 0.3s;
-        }
-
-        .student-card:hover .card-arrow {
-            transform: translateX(0);
-            opacity: 1;
-        }
-
-        /* ── PASSWORD MODAL ── */
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(5, 5, 15, 0.85);
-            backdrop-filter: blur(12px);
-            z-index: 100;
-            align-items: center;
-            justify-content: center;
-            animation: fadeIn 0.25s ease;
-        }
-
-        .modal-overlay.active {
-            display: flex;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-
-            to {
-                opacity: 1;
-            }
-        }
-
-        .modal-box {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 24px;
-            padding: 2.8rem 2.4rem;
-            width: 100%;
-            max-width: 420px;
-            margin: 1rem;
-            position: relative;
-            animation: modalIn 0.4s cubic-bezier(.23, 1, .32, 1) both;
-            overflow: hidden;
-        }
-
-        .modal-box::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background: linear-gradient(90deg, var(--modal-accent, var(--accent1)), transparent);
-        }
-
-        @keyframes modalIn {
-            from {
-                opacity: 0;
-                transform: scale(0.92) translateY(20px);
-            }
-
-            to {
-                opacity: 1;
-                transform: scale(1) translateY(0);
-            }
-        }
-
-        .modal-close {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background: var(--border);
-            border: none;
-            cursor: pointer;
-            color: var(--muted);
-            font-size: 1rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background 0.2s, color 0.2s;
-        }
-
-        .modal-close:hover {
-            background: var(--accent2);
-            color: white;
-        }
-
-        .modal-icon {
-            width: 60px;
-            height: 60px;
-            border-radius: 18px;
-            background: color-mix(in srgb, var(--modal-accent, var(--accent1)) 15%, transparent);
-            border: 1px solid color-mix(in srgb, var(--modal-accent, var(--accent1)) 30%, transparent);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.8rem;
-            margin-bottom: 1.3rem;
-        }
-
-        .modal-title {
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: 2rem;
-            letter-spacing: 0.05em;
-            margin-bottom: 0.3rem;
-        }
-
-        .modal-sub {
-            font-size: 0.85rem;
-            color: var(--muted);
-            margin-bottom: 1.8rem;
-        }
-
-        .input-group {
-            position: relative;
-            margin-bottom: 1.2rem;
-        }
-
-        .input-group input {
-            width: 100%;
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 0.9rem 1.2rem 0.9rem 3rem;
-            font-family: 'DM Mono', monospace;
-            font-size: 1rem;
-            color: var(--text);
-            outline: none;
-            transition: border-color 0.25s, box-shadow 0.25s;
-            letter-spacing: 0.1em;
-        }
-
-        .input-group input:focus {
-            border-color: var(--modal-accent, var(--accent1));
-            box-shadow: 0 0 0 3px color-mix(in srgb, var(--modal-accent, var(--accent1)) 15%, transparent);
-        }
-
-        .input-icon {
-            position: absolute;
-            left: 1rem;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--muted);
-            font-size: 1rem;
-            pointer-events: none;
-        }
-
-        .toggle-pw {
-            position: absolute;
-            right: 1rem;
-            top: 50%;
-            transform: translateY(-50%);
-            background: none;
-            border: none;
-            cursor: pointer;
-            color: var(--muted);
-            font-size: 0.9rem;
-            padding: 0.2rem;
-            transition: color 0.2s;
-        }
-
-        .toggle-pw:hover {
-            color: var(--text);
-        }
-
-        .error-msg {
-            font-size: 0.82rem;
-            color: var(--accent2);
-            margin-bottom: 1rem;
-            display: none;
-            padding: 0.6rem 0.9rem;
-            background: color-mix(in srgb, var(--accent2) 12%, transparent);
-            border-radius: 8px;
-            border: 1px solid color-mix(in srgb, var(--accent2) 25%, transparent);
-            animation: shake 0.4s ease;
-        }
-
-        .error-msg.show {
-            display: block;
-        }
-
-        @keyframes shake {
-
-            0%,
-            100% {
-                transform: translateX(0);
-            }
-
-            25% {
-                transform: translateX(-8px);
-            }
-
-            75% {
-                transform: translateX(8px);
-            }
-        }
-
-        .btn-primary {
-            width: 100%;
-            padding: 0.95rem;
-            background: var(--modal-accent, var(--accent1));
-            border: none;
-            border-radius: 12px;
-            font-family: 'Outfit', sans-serif;
-            font-size: 1rem;
-            font-weight: 600;
-            color: white;
-            cursor: pointer;
-            letter-spacing: 0.03em;
-            transition: opacity 0.2s, transform 0.2s, box-shadow 0.2s;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .btn-primary::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, transparent 60%);
-            pointer-events: none;
-        }
-
-        .btn-primary:hover {
-            opacity: 0.9;
-            transform: translateY(-1px);
-            box-shadow: 0 8px 24px color-mix(in srgb, var(--modal-accent, var(--accent1)) 40%, transparent);
-        }
-
-        .btn-primary:active {
-            transform: translateY(0);
-        }
-
-        .btn-primary:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        /* ── NOTES SCREEN ── */
-        #screen-notes {
-            display: none;
-            min-height: 100vh;
-            padding: 2rem;
-            animation: fadeIn 0.5s ease both;
-        }
-
-        #screen-notes.active {
-            display: block;
-        }
-
-        .notes-header {
-            max-width: 900px;
-            margin: 0 auto 2.5rem;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 1rem;
-        }
-
-        .notes-brand {
-            display: flex;
-            align-items: center;
-            gap: 0.9rem;
-        }
-
-        .notes-avatar {
-            width: 48px;
-            height: 48px;
-            border-radius: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.4rem;
-            font-weight: 700;
-        }
-
-        .notes-user {
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: 1.6rem;
-            letter-spacing: 0.05em;
-        }
-
-        .notes-tagline {
-            font-size: 0.8rem;
-            color: var(--muted);
-        }
-
-        .btn-logout {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            padding: 0.6rem 1.2rem;
-            color: var(--muted);
-            font-family: 'Outfit', sans-serif;
-            font-size: 0.85rem;
-            cursor: pointer;
-            transition: border-color 0.2s, color 0.2s, background 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .btn-logout:hover {
-            border-color: var(--accent2);
-            color: var(--accent2);
-            background: color-mix(in srgb, var(--accent2) 8%, transparent);
-        }
-
-        .admin-badge {
-            background: var(--gold);
-            color: #0a0a0f;
-            padding: 0.4rem 0.8rem;
-            border-radius: 8px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        .admin-header {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-        }
-
-        #admin-notes-panel {
-            width: 100%;
-            max-width: 820px;
-        }
-
-        .admin-section-title {
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: 1.4rem;
-            letter-spacing: 0.05em;
-            color: var(--muted);
-            margin-bottom: 1rem;
-            margin-top: 2rem;
-        }
-
-        .admin-section-title:first-of-type {
-            margin-top: 0;
-        }
-
-        .admin-users-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 1rem;
-        }
-
-        @media (max-width: 600px) {
-            .admin-users-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .admin-user-card {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 1.2rem;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            position: relative;
-        }
-
-        .admin-user-card .card-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-            margin-bottom: 0;
-        }
-
-        .admin-user-info {
-            flex: 1;
-        }
-
-        .admin-user-name {
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: 1.3rem;
-            letter-spacing: 0.05em;
-        }
-
-        .admin-user-label {
-            font-size: 0.7rem;
-            color: var(--muted);
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-        }
-
-        .btn-delete-user {
-            width: 32px;
-            height: 32px;
-            border-radius: 8px;
-            background: none;
-            border: 1px solid var(--border);
-            color: var(--muted);
-            cursor: pointer;
-            font-size: 0.85rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background 0.2s, color 0.2s, border-color 0.2s;
-        }
-
-        .btn-delete-user:hover {
-            background: color-mix(in srgb, var(--accent2) 15%, transparent);
-            border-color: var(--accent2);
-            color: var(--accent2);
-        }
-
-        /* ── NOTES AREA ── */
-        .notes-container {
-            max-width: 900px;
-            margin: 0 auto;
-        }
-
-        .notes-toolbar {
-            display: flex;
-            align-items: center;
-            gap: 0.8rem;
-            margin-bottom: 1.5rem;
-            flex-wrap: wrap;
-        }
-
-        .btn-new-note {
-            background: var(--user-accent, var(--accent1));
-            border: none;
-            border-radius: 10px;
-            padding: 0.65rem 1.3rem;
-            font-family: 'Outfit', sans-serif;
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: white;
-            cursor: pointer;
-            transition: opacity 0.2s, transform 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .btn-new-note:hover {
-            opacity: 0.88;
-            transform: translateY(-1px);
-        }
-
-        .search-bar {
-            flex: 1;
-            min-width: 180px;
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            padding: 0.65rem 1rem 0.65rem 2.5rem;
-            font-family: 'Outfit', sans-serif;
-            font-size: 0.9rem;
-            color: var(--text);
-            outline: none;
-            transition: border-color 0.2s;
-            position: relative;
-        }
-
-        .search-wrap {
-            position: relative;
-            flex: 1;
-            min-width: 180px;
-        }
-
-        .search-icon {
-            position: absolute;
-            left: 0.8rem;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--muted);
-            font-size: 0.85rem;
-            pointer-events: none;
-        }
-
-        .search-bar:focus {
-            border-color: var(--user-accent, var(--accent1));
-        }
-
-        /* ── NOTE EDITOR ── */
-        .note-editor {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            padding: 1.8rem;
-            margin-bottom: 1.5rem;
-            display: none;
-            animation: slideDown 0.3s cubic-bezier(.23, 1, .32, 1);
-        }
-
-        .note-editor.open {
-            display: block;
-        }
-
-        @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-12px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .editor-title-input {
-            width: 100%;
-            background: none;
-            border: none;
-            font-family: 'DM Serif Display', serif;
-            font-size: 1.6rem;
-            color: var(--text);
-            outline: none;
-            margin-bottom: 1rem;
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 0.8rem;
-        }
-
-        .editor-title-input::placeholder {
-            color: var(--muted);
-        }
-
-        .editor-body-input {
-            width: 100%;
-            background: none;
-            border: none;
-            font-family: 'Outfit', sans-serif;
-            font-size: 0.95rem;
-            color: var(--text);
-            outline: none;
-            resize: vertical;
-            min-height: 140px;
-            line-height: 1.7;
-        }
-
-        .editor-body-input::placeholder {
-            color: var(--muted);
-        }
-
-        .editor-actions {
-            display: flex;
-            justify-content: flex-end;
-            gap: 0.7rem;
-            margin-top: 1rem;
-            padding-top: 1rem;
-            border-top: 1px solid var(--border);
-        }
-
-        .btn-cancel {
-            background: none;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 0.5rem 1.1rem;
-            color: var(--muted);
-            font-family: 'Outfit', sans-serif;
-            font-size: 0.88rem;
-            cursor: pointer;
-            transition: border-color 0.2s, color 0.2s;
-        }
-
-        .btn-cancel:hover {
-            border-color: var(--muted);
-            color: var(--text);
-        }
-
-        .btn-save {
-            background: var(--user-accent, var(--accent1));
-            border: none;
-            border-radius: 8px;
-            padding: 0.5rem 1.3rem;
-            color: white;
-            font-family: 'Outfit', sans-serif;
-            font-size: 0.88rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: opacity 0.2s;
-        }
-
-        .btn-save:hover {
-            opacity: 0.88;
-        }
-
-        /* ── NOTES LIST ── */
-        .notes-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-            gap: 1rem;
-        }
-
-        .note-card {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 1.4rem;
-            cursor: pointer;
-            transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
-            position: relative;
-            overflow: hidden;
-            animation: cardIn 0.4s cubic-bezier(.23, 1, .32, 1) both;
-        }
-
-        .note-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background: var(--user-accent, var(--accent1));
-            opacity: 0.5;
-        }
-
-        .note-card:hover {
-            border-color: var(--user-accent, var(--accent1));
-            transform: translateY(-3px);
-            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
-        }
-
-        .note-card-title {
-            font-family: 'DM Serif Display', serif;
-            font-size: 1.05rem;
-            margin-bottom: 0.5rem;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-
-        .note-card-body {
-            font-size: 0.83rem;
-            color: var(--muted);
-            line-height: 1.6;
-            display: -webkit-box;
-            -webkit-line-clamp: 3;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-            margin-bottom: 1rem;
-        }
-
-        .note-card-meta {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .note-card-date {
-            font-size: 0.75rem;
-            color: var(--muted);
-            font-family: 'DM Mono', monospace;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .note-owner {
-            background: var(--gold);
-            color: #0a0a0f;
-            padding: 0.15rem 0.4rem;
-            border-radius: 4px;
-            font-size: 0.65rem;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
-
-        .btn-delete-note {
-            width: 28px;
-            height: 28px;
-            border-radius: 8px;
-            background: none;
-            border: 1px solid var(--border);
-            color: var(--muted);
-            cursor: pointer;
-            font-size: 0.75rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background 0.2s, color 0.2s, border-color 0.2s;
-        }
-
-        .btn-delete-note:hover {
-            background: color-mix(in srgb, var(--accent2) 15%, transparent);
-            border-color: var(--accent2);
-            color: var(--accent2);
-        }
-
-        .empty-state {
-            grid-column: 1 / -1;
-            text-align: center;
-            padding: 4rem 2rem;
-            color: var(--muted);
-        }
-
-        .empty-state .empty-icon {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-            opacity: 0.4;
-        }
-
-        .empty-state p {
-            font-size: 0.95rem;
-        }
-
-        /* ── LOADING ── */
-        .spinner {
-            width: 20px;
-            height: 20px;
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            border-top-color: white;
-            border-radius: 50%;
-            animation: spin 0.7s linear infinite;
-            display: inline-block;
-        }
-
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
-
-        .loading-notes {
-            grid-column: 1/-1;
-            display: flex;
-            justify-content: center;
-            padding: 3rem;
-        }
-
-        .loading-notes .spinner {
-            border-top-color: var(--user-accent, var(--accent1));
-            border-color: color-mix(in srgb, var(--user-accent, var(--accent1)) 20%, transparent);
-        }
-
-        /* ── STATUS TOAST ── */
-        .toast {
-            position: fixed;
-            bottom: 2rem;
-            right: 2rem;
-            z-index: 999;
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 0.9rem 1.4rem;
-            font-size: 0.9rem;
-            font-weight: 500;
-            transform: translateY(8px);
-            opacity: 0;
-            transition: transform 0.3s, opacity 0.3s;
-            max-width: 300px;
-        }
-
-        .toast.show {
-            transform: translateY(0);
-            opacity: 1;
-        }
-
-        .toast.success {
-            border-left: 3px solid var(--accent3);
-        }
-
-        .toast.error {
-            border-left: 3px solid var(--accent2);
-        }
-    </style>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Jacket Orders — Class of 09</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg: #080810;
+  --surface: #0f0f1a;
+  --card: #13131f;
+  --border: #1e1e30;
+  --border-light: #2a2a40;
+  --gold: #c9a84c;
+  --gold-light: #e8c97a;
+  --gold-dim: rgba(201,168,76,0.12);
+  --text: #e4e4f0;
+  --text-dim: #8888aa;
+  --text-faint: #44445a;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;overflow-x:hidden}
+body::after{content:'';position:fixed;inset:0;z-index:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");opacity:.03;pointer-events:none}
+
+/* HERO */
+.hero{position:relative;z-index:1;padding:5rem 2rem 3rem;text-align:center;border-bottom:1px solid var(--border);overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 50% at 50% 0%,rgba(201,168,76,.07) 0%,transparent 70%);pointer-events:none}
+.hero-eyebrow{font-family:'DM Mono',monospace;font-size:.72rem;letter-spacing:.35em;color:var(--gold);text-transform:uppercase;margin-bottom:1.4rem;opacity:0;animation:fadeUp .7s .1s ease forwards}
+.hero-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(4rem,13vw,9rem);line-height:.88;letter-spacing:.04em;color:#fff;margin-bottom:.2em;opacity:0;animation:fadeUp .8s .2s ease forwards}
+.hero-title span{background:linear-gradient(135deg,var(--gold) 0%,var(--gold-light) 50%,var(--gold) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;filter:drop-shadow(0 0 40px rgba(201,168,76,.5))}
+.hero-sub{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:clamp(1rem,2.5vw,1.35rem);color:var(--text-dim);margin-bottom:3rem;opacity:0;animation:fadeUp .8s .35s ease forwards}
+.stats-bar{display:inline-flex;gap:0;border:1px solid var(--border-light);border-radius:16px;overflow:hidden;opacity:0;animation:fadeUp .8s .5s ease forwards}
+.stat-item{padding:1rem 2rem;text-align:center;border-right:1px solid var(--border-light)}
+.stat-item:last-child{border-right:none}
+.stat-num{font-family:'Bebas Neue',sans-serif;font-size:2.2rem;color:var(--gold);line-height:1;display:block}
+.stat-label{font-size:.7rem;letter-spacing:.15em;color:var(--text-dim);text-transform:uppercase;display:block;margin-top:.2rem}
+@media(max-width:500px){.stats-bar{flex-direction:column}.stat-item{border-right:none;border-bottom:1px solid var(--border-light)}.stat-item:last-child{border-bottom:none}}
+
+/* CONTROLS */
+.controls{position:sticky;top:0;z-index:50;background:rgba(8,8,16,.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:1rem 2rem;display:flex;align-items:center;gap:1rem;flex-wrap:wrap}
+.search-wrap{position:relative;flex:1;min-width:220px}
+.search-icon{position:absolute;left:1rem;top:50%;transform:translateY(-50%);color:var(--text-dim);font-size:.9rem;pointer-events:none}
+.search-input{width:100%;background:var(--card);border:1px solid var(--border-light);border-radius:10px;padding:.7rem 1rem .7rem 2.6rem;font-family:'Syne',sans-serif;font-size:.9rem;color:var(--text);outline:none;transition:border-color .25s,box-shadow .25s}
+.search-input::placeholder{color:var(--text-faint)}
+.search-input:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,168,76,.1)}
+.filter-group{display:flex;gap:.5rem;flex-wrap:wrap}
+.filter-btn{background:var(--card);border:1px solid var(--border-light);border-radius:8px;padding:.55rem 1rem;font-family:'DM Mono',monospace;font-size:.75rem;letter-spacing:.08em;color:var(--text-dim);cursor:pointer;transition:all .2s;white-space:nowrap}
+.filter-btn:hover{border-color:var(--gold);color:var(--gold-light)}
+.filter-btn.active{background:var(--gold-dim);border-color:var(--gold);color:var(--gold-light)}
+.count-badge{font-family:'DM Mono',monospace;font-size:.72rem;color:var(--text-dim);margin-left:auto;white-space:nowrap;padding:.4rem .8rem;background:var(--surface);border:1px solid var(--border);border-radius:6px}
+
+/* GRID */
+.grid-wrapper{position:relative;z-index:1;padding:2rem;max-width:1400px;margin:0 auto}
+.orders-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1.2rem}
+@media(max-width:420px){.orders-grid{grid-template-columns:1fr}}
+
+/* ORDER CARD */
+.order-card{background:var(--card);border:1px solid var(--border);border-radius:18px;overflow:hidden;cursor:pointer;transition:transform .3s cubic-bezier(.23,1,.32,1),border-color .3s,box-shadow .3s;animation:cardIn .5s cubic-bezier(.23,1,.32,1) both;position:relative}
+.order-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--gold),transparent 60%);opacity:0;transition:opacity .3s}
+.order-card:hover{transform:translateY(-5px);border-color:var(--border-light);box-shadow:0 20px 50px rgba(0,0,0,.5),0 0 0 1px rgba(201,168,76,.08)}
+.order-card:hover::before{opacity:1}
+@keyframes cardIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+
+.card-head{padding:1.4rem 1.4rem 1rem;display:flex;align-items:flex-start;gap:1rem;border-bottom:1px solid var(--border)}
+.card-avatar{width:46px;height:46px;border-radius:12px;background:var(--gold-dim);border:1px solid rgba(201,168,76,.25);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:1.15rem;color:var(--gold);flex-shrink:0;letter-spacing:.05em}
+.card-head-info{flex:1;min-width:0}
+.card-name{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:.06em;color:#fff;line-height:1;margin-bottom:.3rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card-meta{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
+.badge-patches{font-family:'DM Mono',monospace;font-size:.7rem;letter-spacing:.1em;background:var(--gold-dim);border:1px solid rgba(201,168,76,.3);color:var(--gold-light);border-radius:6px;padding:.2rem .6rem}
+.badge-date{font-family:'DM Mono',monospace;font-size:.68rem;color:var(--text-faint)}
+.card-order-num{font-family:'Bebas Neue',sans-serif;font-size:2.5rem;color:var(--border-light);line-height:1;letter-spacing:-.02em;margin-left:auto;flex-shrink:0;transition:color .3s}
+.order-card:hover .card-order-num{color:rgba(201,168,76,.15)}
+
+.card-body{padding:1.1rem 1.4rem}
+.section-label{font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:.2em;color:var(--text-faint);text-transform:uppercase;margin-bottom:.4rem;display:flex;align-items:center;gap:.4rem}
+.section-label::after{content:'';flex:1;height:1px;background:var(--border)}
+.placement-text{font-size:.85rem;color:var(--text-dim);line-height:1.6;margin-bottom:1rem;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.quote-block{background:var(--surface);border-left:2px solid var(--gold);border-radius:0 10px 10px 0;padding:.75rem 1rem;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:.95rem;color:var(--text);line-height:1.65;margin-bottom:1rem;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+
+.links-row{display:flex;gap:.4rem;flex-wrap:wrap;padding:.8rem 1.4rem;border-top:1px solid var(--border)}
+.link-chip{display:inline-flex;align-items:center;gap:.3rem;font-family:'DM Mono',monospace;font-size:.68rem;letter-spacing:.05em;color:var(--text-dim);background:var(--surface);border:1px solid var(--border-light);border-radius:6px;padding:.3rem .6rem;text-decoration:none;transition:border-color .2s,color .2s,background .2s}
+.link-chip:hover{border-color:var(--gold);color:var(--gold-light);background:var(--gold-dim)}
+
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(4,4,12,.92);backdrop-filter:blur(16px);z-index:200;align-items:center;justify-content:center;padding:1rem}
+.modal-overlay.open{display:flex;animation:fadeIn .2s ease}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.modal{background:var(--card);border:1px solid var(--border-light);border-radius:24px;width:100%;max-width:680px;max-height:90vh;overflow-y:auto;animation:modalIn .35s cubic-bezier(.23,1,.32,1);position:relative;scrollbar-width:thin;scrollbar-color:var(--border-light) transparent}
+@keyframes modalIn{from{opacity:0;transform:scale(.94) translateY(16px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.modal-close{position:sticky;top:1rem;float:right;margin:1rem 1rem 0 0;width:34px;height:34px;border-radius:50%;background:var(--surface);border:1px solid var(--border-light);color:var(--text-dim);cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;transition:background .2s,color .2s;z-index:10}
+.modal-close:hover{background:#ff4444;color:#fff;border-color:#ff4444}
+.modal-header{padding:2rem 2rem 1.5rem;border-bottom:1px solid var(--border)}
+.modal-order-num{font-family:'DM Mono',monospace;font-size:.75rem;letter-spacing:.25em;color:var(--gold);opacity:.7;margin-bottom:.5rem}
+.modal-name{font-family:'Bebas Neue',sans-serif;font-size:3rem;letter-spacing:.05em;color:#fff;line-height:1;margin-bottom:.6rem}
+.modal-body{padding:1.5rem 2rem}
+.modal-section{margin-bottom:1.8rem}
+.modal-section-title{font-family:'DM Mono',monospace;font-size:.65rem;letter-spacing:.25em;color:var(--gold);text-transform:uppercase;margin-bottom:.8rem;display:flex;align-items:center;gap:.5rem}
+.modal-section-title::after{content:'';flex:1;height:1px;background:var(--border)}
+.modal-text{font-size:.92rem;color:var(--text-dim);line-height:1.75;white-space:pre-wrap}
+.modal-quote{background:var(--surface);border:1px solid rgba(201,168,76,.2);border-left:3px solid var(--gold);border-radius:0 12px 12px 0;padding:1.2rem 1.4rem;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.15rem;color:var(--text);line-height:1.75;white-space:pre-wrap}
+.modal-links{display:flex;flex-wrap:wrap;gap:.5rem}
+.modal-link{display:inline-flex;align-items:center;gap:.4rem;background:var(--surface);border:1px solid var(--border-light);border-radius:8px;padding:.5rem .9rem;font-family:'DM Mono',monospace;font-size:.75rem;letter-spacing:.05em;color:var(--text-dim);text-decoration:none;transition:all .2s}
+.modal-link:hover{background:var(--gold-dim);border-color:var(--gold);color:var(--gold-light)}
+
+/* EMPTY */
+.empty-state{text-align:center;padding:5rem 2rem;color:var(--text-dim);display:none}
+.empty-state .big{font-family:'Bebas Neue',sans-serif;font-size:4rem;color:var(--border-light);margin-bottom:1rem}
+.empty-state p{font-size:.95rem}
+
+/* FOOTER */
+.footer{position:relative;z-index:1;text-align:center;padding:2rem;border-top:1px solid var(--border);font-family:'DM Mono',monospace;font-size:.7rem;letter-spacing:.12em;color:var(--text-faint)}
+.footer span{color:var(--gold)}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+</style>
 </head>
-
 <body>
 
-    <div class="blob blob-1"></div>
-    <div class="blob blob-2"></div>
-    <div class="blob blob-3"></div>
+<header class="hero">
+  <div class="hero-eyebrow">Class of 2026 · Jacket Orders</div>
+  <h1 class="hero-title">ORDER<br><span>VAULT</span></h1>
+  <p class="hero-sub">Every patch. Every quote. Every story.</p>
+  <div class="stats-bar">
+    <div class="stat-item"><span class="stat-num" id="total-count">0</span><span class="stat-label">Orders</span></div>
+    <div class="stat-item"><span class="stat-num" id="total-patches">0</span><span class="stat-label">Total Patches</span></div>
+    <div class="stat-item"><span class="stat-num">Feb</span><span class="stat-label">Period</span></div>
+  </div>
+</header>
 
-    <div id="app">
+<div class="controls">
+  <div class="search-wrap">
+    <span class="search-icon">⌕</span>
+    <input class="search-input" type="text" placeholder="Search by name, quote, placement…" oninput="filterOrders(this.value)"/>
+  </div>
+  <div class="filter-group">
+    <button class="filter-btn active" onclick="setFilter('all',this)">All</button>
+    <button class="filter-btn" onclick="setFilter('1',this)">1 Patch</button>
+    <button class="filter-btn" onclick="setFilter('2',this)">2 Patches</button>
+    <button class="filter-btn" onclick="setFilter('3',this)">3 Patches</button>
+    <button class="filter-btn" onclick="setFilter('4',this)">4 Patches</button>
+    <button class="filter-btn" onclick="setFilter('5+',this)">5+ Patches</button>
+  </div>
+  <div class="count-badge" id="count-badge">— orders</div>
+</div>
 
-        <!-- ══ LANDING ══ -->
-        <div id="screen-landing">
-            <h1 class="site-title" ondblclick="openAdminModal()">NoteVault</h1>
-            <p class="site-subtitle">Your private space to think, write & remember</p>
+<div class="grid-wrapper">
+  <div class="orders-grid" id="orders-grid"></div>
+  <div class="empty-state" id="empty-state">
+    <div class="big">404</div>
+    <p>No orders match your search.</p>
+  </div>
+</div>
 
-            <div id="admin-notes-panel" style="display: none;">
-                <div class="admin-header">
-                    <span class="admin-badge" style="display: block;">👑 Admin Mode - All Notes</span>
-                    <button class="btn-logout" onclick="logout()">Exit Admin</button>
-                </div>
-                
-                <div class="admin-users-section">
-                    <h3 class="admin-section-title">Manage Users</h3>
-                    <div class="admin-users-grid" id="admin-users-grid"></div>
-                </div>
+<div class="modal-overlay" id="modal" onclick="handleOverlayClick(event)">
+  <div class="modal" id="modal-box">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-header" id="modal-header"></div>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
 
-                <div class="admin-section-title">All Notes</div>
-                <div class="search-wrap" style="margin-bottom: 1.5rem;">
-                    <span class="search-icon">🔍</span>
-                    <input class="search-bar" type="text" placeholder="Search all notes…"
-                        oninput="filterAdminNotes(this.value)" />
-                </div>
-                <div class="notes-list" id="admin-notes-list"></div>
-            </div>
+<footer class="footer"><span>ORDER VAULT</span> · Class of 2026 · All rights reserved</footer>
 
-            <div class="student-grid" id="student-grid">
-                <div class="student-card" onclick="openModal('waleed1')">
-                    <div class="card-number">01</div>
-                    <div class="card-icon">📚</div>
-                    <div class="card-name">Waleed 1</div>
-                    <div class="card-label">Student Vault</div>
-                    <div class="card-arrow">→</div>
-                </div>
-                <div class="student-card" onclick="openModal('waleed2')">
-                    <div class="card-number">02</div>
-                    <div class="card-icon">✏️</div>
-                    <div class="card-name">Waleed 2</div>
-                    <div class="card-label">Student Vault</div>
-                    <div class="card-arrow">→</div>
-                </div>
-                <div class="student-card" onclick="openModal('waleed3')">
-                    <div class="card-number">03</div>
-                    <div class="card-icon">🔬</div>
-                    <div class="card-name">Waleed 3</div>
-                    <div class="card-label">Student Vault</div>
-                    <div class="card-arrow">→</div>
-                </div>
-            </div>
+<script>
+const ORDERS=[{name:"Atallah Wahbeh",date:"17/02/2026",patches:4,links:["https://drive.google.com/open?id=19IbkftQKlDWS3wt3dWiW_Xr75dhjvgJL","https://drive.google.com/open?id=1U7RKOAJYKnR9YfnYEmoZdeNtdn9qWhdu","https://drive.google.com/open?id=1oW__CY3lzjGAvI9k9Q0RmHS9o_bLTGC9","https://drive.google.com/open?id=1EzXVE_yS1Y60LUaeG1hy-c_vhp4gciHj"],placement:"Right hand: Aston Martin and under it fire. Left hand: hammer and under it 'c'est la vie'.",quote:"I don't need luck to perform…\nI decide when to perform good."},{name:"Lamar",date:"18/02/2026",patches:4,links:["https://drive.google.com/open?id=1OYwKbUuqwgXUyi4bIVmpGNsGiWb1-Sn1","https://drive.google.com/open?id=1AhAbRvWQREL8e0rt2gVanqzQuZWJ71VE","https://drive.google.com/open?id=17omWFoTTf9Vdp7akvf23RfxtNvIVttnS","https://drive.google.com/open?id=19Yrg4jB4drKbXS87iE4P3nyYr4dyRJXa"],placement:"The moon up, the magic shop underneath it, on the right arm. 1 piece patches on left arm.",quote:"قَالُوا سُبْحَانَكَ لَا عِلْمَ لَنَا إِلَّا مَا عَلَّمْتَنَا ۖ إِنَّكَ أَنتَ الْعَلِيمُ الْحَكِيمُ"},{name:"Abdullah Moayad",date:"18/02/2026",patches:2,links:["https://drive.google.com/open?id=1yzk7PuqqqMGC4AJAoFRrwpbixysXONQl","https://drive.google.com/open?id=1DQekYV497fw_Hw-XrcDIPJ1kDsKYNyzB"],placement:"Right",quote:"Error 404: Failure not found."},{name:"Omar Aburadaha",date:"18/02/2026",patches:3,links:["https://drive.google.com/open?id=1SwcXip8b_bfizfKUxwMGOfMZZDQg9K-V","https://drive.google.com/open?id=1erRj0Z6Gkuj9NrjwoIcnD7WgW4x5ytjQ","https://drive.google.com/open?id=17VzNv40_ooSX_r-oghn2LN7H7QtHTFKp"],placement:"Porsche on the left arm. 'Out of Luck' above 'Money' on the right.",quote:"Sometimes you will never know the value of a moment, until it becomes a memory."},{name:"Yousef AlHaj Qasem",date:"18/02/2026",patches:4,links:["https://drive.google.com/open?id=1IBN5q_2V46_tpZ7z_-pUUR-ddG9S8P_h","https://drive.google.com/open?id=1OiViyQ-HkyV-GY4ItUr2wlL15IknpNwz","https://drive.google.com/open?id=1laK1InTHgVup-kISDOqvii6Wq9-YOD3X","https://drive.google.com/open?id=1PlIAgi9PBrjPasAczkv0xtXD6XkG3pRm"],placement:"RedBull / Nürburgring → shoulders (right/left). Better Call Saul → chest. 'It's showtime folks' → lower sleeve, just above the cuff.",quote:"He who has a why to live can bear almost any how.\n— Friedrich Nietzsche"},{name:"Sedra",date:"18/02/2026",patches:"3 (one text)",links:["https://drive.google.com/open?id=1MYq5I312Wc4qYVNSxg2MnKFtI4azVlVQ","https://drive.google.com/open?id=1KeYwb4Cr6QuYRCzDxnR_DPdPCiHznHnq","https://drive.google.com/open?id=1M21GNtzR8KKamZi54aXz3Mlbg7Mf4_fs","https://drive.google.com/open?id=1b8mKTIoZmW2yhMX6Gthf1aQYlNdebgAc"],placement:"Patches 1 & 2 on one side (not the '09' side). Mercedes logo under the bow. Under '09': text patch in bold without '-adele', in white.",quote:"Carpe Diem\n(same font as attached picture, in white)"},{name:"Ahmad Dajani",date:"18/02/2026",patches:1,links:["https://drive.google.com/open?id=1fIewX70ftabHTUKNbM3xAwosqLYrLThq"],placement:"Right",quote:"The cycle ends here\n— Kratos"},{name:"Nada Zarour",date:"19/02/2026",patches:2,links:["https://drive.google.com/open?id=12i20QS6XfC2wG7MkhL08HBCHxU3kr9YU","https://drive.google.com/open?id=1QvMoRVoQgYpGKu1W9YwXQLVCYelZ5JtU","https://drive.google.com/open?id=1GSEK7fyG4N-DHmwdSDfuVueCLFd1k3hU"],placement:"Flower petals on one arm under the number. Other flower + chess on the other arm. Sent a pic for placement reference.",quote:"يا رب رضاك والمعدل هضاك"},{name:"Aram Omar",date:"19/02/2026",patches:2,links:["https://drive.google.com/open?id=1BhR5LPD8vkdd_T8P95e01lZsmZvR-ch-","https://drive.google.com/open?id=15q7PRZ8jQHIMt-Pzk99LCHI0N22vOvmV"],placement:"Not on the 09 arm. Other arm: logo on top, 'ذهب' under it.",quote:"زيحو للمهندس\n(font big, not too big)"},{name:"Zaineddin Sbeih",date:"19/02/2026",patches:4,links:["https://drive.google.com/open?id=1PBnxC2wUh8vxIv4WC0aK0sOMqdDTwwr5","https://drive.google.com/open?id=1EJdjy1IMiT-xzBlCoLsmUDrm-cMlt_lQ","https://drive.google.com/open?id=1QGCv5_lh0h4VsRYbgSp-BdOrvSpoDrFg","https://drive.google.com/open?id=1maV-KulemsNKfcJ_g4wYkB9fbhlivpjP","https://drive.google.com/file/d/13lxa2l7spBV1fyLT48zi5sOSxyb_PuH3/view"],placement:"Right arm: AMG logo + man in hat under AMG. Left arm: dice with money + joker ace card under it + zombie on left hand under 09.",quote:"I know a guy who knows a guy who knows another guy."},{name:"Kinan Hamad",date:"19/02/2026",patches:4,links:["https://drive.google.com/open?id=1BOPvtQyTFok9j3mqASVU5Glyn9j_","https://drive.google.com/open?id=1eL67mQqrTRDzTOFTFqU_oX8pGgvHJSdV","https://drive.google.com/open?id=1YkuZ4yB8pVBX-H2y4MUjMHEV75qBYOmO","https://drive.google.com/open?id=1-0U_pmJU9mKnqPWIHlHo-OQG8KBrxUPo","https://drive.google.com/file/d/1sa7qG8LLHLdRaDQWGcPlFy3J_qBAN-ei/view"],placement:"Right arm: black guy + praying hands under. Left arm: barking dog + screaming basketball (no jeans background) + zombie under the angry basketball.",quote:"Not every lion that chased a deer caught it, but every lion who caught a deer chased it."},{name:"Ammar Jadallah 2",date:"19/02/2026",patches:1,links:["https://drive.google.com/open?id=1Vsmv4l20XpbgtjNVQKsOFeGTPXa1IDIC","https://drive.google.com/open?id=1WEeO3zv_AwqH1wawd67n7N3h0d955188"],placement:"Right",quote:"Quote is in the photo — keep it exactly, no sword, same style, stacked as in picture."},{name:"Issa 2",date:"19/02/2026",patches:3,links:["https://drive.google.com/file/d/1vOGPow3JSrwVuldS-xD8UZx46N4DMc50/view"],placement:"اللستكر على اليمين ابو واصف وعلى الشمال الفاروق",quote:"اليقين أن لا تُرضي الناس بسخط الله\nنحن قوم أعزّنا الله بالإسلام، فمهما ابتغينا العزة بغيره أذلّنا الله"},{name:"Lina Abu Ziad 2",date:"20/02/2026",patches:2,links:["https://drive.google.com/open?id=1bxTH_cOxpTmYgna7Op-hqDdqBvFqW_at","https://drive.google.com/open?id=1ha7xPce34VoGOgRKekfisA5DVRbKmlDj"],placement:"Date on the wrist of the 09 arm (like in pic). Other patch on the other arm.",quote:"When you can't find light, be it."},{name:"Khaled Hamamda",date:"21/02/2026",patches:5,links:["https://drive.google.com/open?id=1ZQL8rZJ5zEDXPWj07W8CYBbuPc7ysrbL","https://drive.google.com/open?id=1_P3-HrrGo7F0UmYc7duWwJ1TajIIz1qV","https://drive.google.com/open?id=18PWpmYPb69keNBkY5NWmISvmv6FUnEkq","https://drive.google.com/open?id=12P4GkpWSNvdQmfYn6M6YHLT-GC0XAA"],placement:"Spotify: beneath wrist at end of left sleeve. Greek patch: open area on chest opposite side of name. Dragon: empty shoulder. Bomb: beneath Dragon with space. Ferrari: end of other sleeve above wrist (tiny).",quote:"Μολὼν Λαβέ"},{name:"Hind Jabr",date:"21/02/2026",patches:5,links:["https://drive.google.com/open?id=1AZlm8ji-QM_meWBFlZCJdPGgFcDnRcM9","https://drive.google.com/open?id=1TqC74cf2BExS2pxIerdIMtu4oKH8N-Y5","https://drive.google.com/open?id=1f3OHCmGnu-meWBFlZCJdP","https://drive.google.com/open?id=1usQoitkb2v3Fv_sl8UmBfg8pGgvHJSdV","https://drive.google.com/file/d/1hmNaTJoiY1tvkcdatJzjiyIlO_pF69SH/view"],placement:"Blue guy on wrist of 09 arm. Numbers on other wrist. Cat and paw in normal place. Zombie plant on left hand under 09.",quote:"to speak or to die?"},{name:"Adam Assi",date:"21/02/2026",patches:3,links:["https://drive.google.com/open?id=1SeoV-XaPOMKACO8lQxWOfEl6tqmiz7gV","https://drive.google.com/open?id=12gJhVVRIbIEvMBrjAKTmkmzrwFM8dIBC","https://drive.google.com/open?id=1arJpKjWQ8tIHpCnQiX7JGH0O5AT2rotv"],placement:"GSW under 09. Brilliant on the other arm (no 09). Math patch under the brilliant.",quote:"Yesterday was the past.\nTomorrow's the future.\nToday is a gift — that's why it's called the present."},{name:"Mohammad",date:"21/02/2026",patches:3,links:["https://drive.google.com/open?id=1hl7u8BOElxBtnLH5PNeMnNJ02LSX5JaV"],placement:"On the right hand.",quote:"Only those who have suffered can see the light within the shadows."},{name:"Rayyan Jadallah",date:"21/02/2026",patches:1,links:["https://drive.google.com/open?id=1FdnPmQO4rSpXcJ527zp_by_ehsEi21RW"],placement:"On right sleeve.",quote:"I don't play the odds, I play the man.\n— Harvey Specter"},{name:"Omar Musleh",date:"22/02/2026",patches:3,links:["https://drive.google.com/open?id=1kuvWe1d8b4D6NDSuIQQV8bB3_rn2ipKm","https://drive.google.com/open?id=1f7tLsOFfw3P24kvvb3K8tD31oIR5CbSZ","https://drive.google.com/open?id=1TJHicmJI42JIFICktOrC1_EhoVSgcJF4"],placement:"'Mission passed, get in loser…' on the right. Penguin on the left.",quote:"1 fact beats 40 scholars, but 40 facts can't beat 1 fool.\n— Omar Musleh"},{name:"Omar Abuameera",date:"22/02/2026",patches:2,links:["https://drive.google.com/open?id=1J9A5gSZwn62kEGGZzT5E73EzTh3P-4od","https://drive.google.com/open?id=14r1OBS9CguPB47ueW6hCnQjKcFalTdCn","https://drive.google.com/open?id=1KKGi5ravz5ysSOPGcpbpRZ3LAuyIY2dU"],placement:"شعار الحفرة عالكتف اليمين، المثلث تحتو المواي تاي عالكتف الشمال",quote:""},{name:"Layla Abu Taha",date:"22/02/2026",patches:4,links:["https://drive.google.com/open?id=1BuvAcjhZGbWrJPFKlu4zw8BNsqwoxdi9","https://drive.google.com/open?id=1ygwceCsYzKJKd5Nxt4kXep9dpvYZvpDe","https://drive.google.com/open?id=1xYdk8DW5FVIYMUra-4od","https://drive.google.com/open?id=1wd90mW9L3XliZJrv2ZmF9Zi--TSNeSKF"],placement:"1. Butterflies near elbow joint, hand without 09.\n2. Time quote near wrist.\n3. Jellyfish + star under 09, medium sized.\n4. Fourth sticker on the back, as low as possible.",quote:"Sticker 4 placement shown in separate image."},{name:"Sara Suleiman",date:"22/02/2026",patches:4,links:["https://drive.google.com/open?id=11w6n9VhgcFGkSYJu5oxS0CJmL_VWI6Ar","https://drive.google.com/open?id=1L4hd00de3B5nAATukEdnwg8PyXBU1YQq","https://drive.google.com/open?id=1_U3r1QUl0Y5TvoivWuRxGZ8lSuJdOsNc","https://drive.google.com/open?id=1UKzPNH73fXt8PVvIa_iL0Qnl1FZe7f_v"],placement:"Right: 09 in Shabreh style. Under it 'I will remember and recover, not forgive or forget.' Left: Stitch medium + star beside. Back center: quote in Naskh font.",quote:"العلامات بتروح وبتيجي اهم اشي النفسية\n(بخط النسخ، من ورا الجوكيت)"},{name:"Waleed Fares",date:"22/02/2026",patches:2,links:["https://drive.google.com/open?id=1qLj96dtG7gahPEYDnBP-tfBxJ4req2qR","https://drive.google.com/open?id=10C6eDJQqgttTb4EqTxOzmfV3HgC5LNb3"],placement:"Palestine Map on the right. Other patch on the left.",quote:"Until it's done tell NONE."},{name:"Rasha Barghouti",date:"22/02/2026",patches:2,links:["https://drive.google.com/open?id=16p3nzJETYUyMjVZohyLJyKB9VQXr9e9z","https://drive.google.com/open?id=1oiq8UXB9BzRVtMUHcZneP1GA9iJS0vGd","https://drive.google.com/open?id=1LfqIYfPNmjtfs69jHuSR-65zk2RY8u-_","https://drive.google.com/open?id=1RytbpVhdrtCCoHZunbwq3aJa35p5KasB"],placement:"First: white lining of cat only, no white background. Second (09 side): wraps slightly around arm, stem curves. All in white except little dragon (keeps original colors).",quote:"Dedicate your heart."},{name:"Hala 3",date:"23/02/2026",patches:2,links:["https://drive.google.com/open?id=10Q_mTPXblvm-BT-BGxOOTg2dZbdsKVf5","https://drive.google.com/open?id=1Ct_FYhzVkopKgreUHxKtiZyMLKFZaedx","https://drive.google.com/open?id=15McO2jMAmsFKQW9ReAHhpR7-wdAbx6qC","https://drive.google.com/open?id=1Jg1l28vO2bV9iq20br6kv1xZ2msmE96T"],placement:"Patches as in picture, but white flower instead of black.",quote:"Same font as in the picture, but white not black."},{name:"Hala Ajouli",date:"23/02/2026",patches:9,links:["https://drive.google.com/open?id=1RGzra1IVf3_ALN","https://drive.google.com/open?id=1Ru7hkn3U6f7115hXPwoq7bEI7KmqV6kA","https://drive.google.com/open?id=1Yl9SUS43w3flSX452J2MzWpB-GVJX9Qc","https://drive.google.com/open?id=1L4S3x80z-IYV6GRx2OahaRDsYeDtK10H","https://drive.google.com/open?id=1EgbX6Ww64YfFAMa0VLBsmv4l20Xpbgt","https://drive.google.com/open?id=1ag0gdV4CK1MEHAsMOTQaiOO2F_RpLIwu","https://drive.google.com/open?id=1HYIZRr-EngiaSfXF8OyvWbfXLVcwXFue","https://drive.google.com/open?id=1JfAulaPVfgZIdJJjUA9boW2h0oY1fyql","https://drive.google.com/open?id=1KkN1kjNhDGCikNlmrAFXF3_ALN","https://drive.google.com/open?id=16zFCqduVyVbZuYm_zGY2ZAPDEADH-WUV"],placement:"See Google Drive PDF: 'Guide to Patch Organization' for all placement, sizing, and design details. All patches in highest quality in the folder.",quote:"See PDF guide for full details."},{name:"Lana Shahin",date:"23/02/2026",patches:3,links:["https://drive.google.com/open?id=1H6auXdCFPCpKaFi2ptCerXL_sErA0iWX","https://drive.google.com/open?id=1Sq67M0sHJt4YLJzOzNL7bFVSxfEoVkxL","https://drive.google.com/open?id=1USFE4aftIpTSqeLw4XXIPBBk9RtHcTn9","https://drive.google.com/open?id=1yxiDpkkfyFQGuKXLRcA1aatQ1LIFAjmZ"],placement:"First the deer, then the bow under it (same size). Right arm inner wrist: medium butterfly.",quote:""},{name:"Malak Shuaibi",date:"23/02/2026",patches:4,links:["https://drive.google.com/open?id=1p_yru_Tj4zT-1f_fJAotTAUNZ0RwF0Hl","https://drive.google.com/open?id=1Bpdz7PDE1r9UqQ2hhleW3fpjOO-0jxcw","https://drive.google.com/open?id=1NVjsc9mM0tgWy-ZHzYtpVUrh38gLQmYZ","https://drive.google.com/open?id=191nVuP5UFk6vgnBwUmrfUFYbpo7vfMz6","https://drive.google.com/open?id=1WGXn2DxGuGYQqr7OMM2dQz_C7Skr3-AB"],placement:"All patches right side: Strawberry Shortcake → Flower → sleeping cat near sleeve. Quote on 09 hand going down sleeve. Quote on back in Adobe Naskh. 'Good Things Take Time' — two words per line.",quote:"Be the change you wish to see in the world.\n(font: Chancery)"},{name:"Yaman Jaradat",date:"23/02/2026",patches:5,links:["https://drive.google.com/open?id=1TkMfVOEuMGoix8LctN_rPPGd0RyUUxDq","https://drive.google.com/open?id=1E1NgIj7LCuVhp2mxfWyHbzW7TQdEVW_1","https://drive.google.com/open?id=19xeQxh1EycN-04Mru25__NAUgZ2tXDqv","https://drive.google.com/open?id=1PACAferLimFZqwpcQHeX-oW-cD4BMF57","https://drive.google.com/open?id=1-n5aef_S5JZzWOPrVX8R9TsL11hcJj89"],placement:"Patch 1 (space): right hand normal. Patch 2 (Arabic): under 1. Patch 3 (green portal): right wrist. Patch 4 (real): under 09 left hand. Patch 5: left wrist.",quote:"rage against the dying of the light\n(Cinzel font, all bold)"},{name:"AMR FAWAZ",date:"24/02/2026",patches:5,links:["https://drive.google.com/open?id=1Y5TKrL2z0TNpuRpxlhFy5ku-ZojIplYD","https://drive.google.com/open?id=1mbUNu3K2RCIs1gGsva7UEhS4dQV2WCOh","https://drive.google.com/open?id=19r2-U6TKpBaRrL24FzqX9aheGKt1qm6F","https://drive.google.com/open?id=1zNDAUOxvFHFsWajlCnWXcFQZpIKCGukT"],placement:"09 side: 1, 2 under 1, 4 under 2. Other side: 3, 5 under 3.",quote:"Patria o Muerte, Venceremos.\n— Che Guevara"},{name:"Jana Abutaqa",date:"24/02/2026",patches:3,links:["https://drive.google.com/open?id=1GJyRyRIcpgWJsNj8JxwQJzFazx54bcQR","https://drive.google.com/open?id=18J7pCWvuZvcYe4hdhFHv75qib_wxTh2U","https://drive.google.com/open?id=1Q2RHFI8AEkpRISNYyrULhX0beX4-NOFA","https://drive.google.com/open?id=1suWDhoauX8oTkKCJ8gLrUgaF4oG4Ka5W","https://drive.google.com/open?id=1XSgUF1kxCepR1onoL3Z3HGpPFQO4ltZF"],placement:"Penguin and flower as shown in sleeve pic. Cat at the bottom of same sleeve, tilted. Bow in 09 sleeve under 09, slightly tilted.",quote:"Who cares if I'm pretty if I fail my finals.\n— Rory Gilmore (cursive font)"},{name:"Saba Mataria 2",date:"24/02/2026",patches:3,links:["https://drive.google.com/open?id=1XuZV0MZQiJLDP82jA5Dgd8FqB2-Wh8Zo","https://drive.google.com/open?id=1RGQIykEmnmsG2N-TrPq4Qx631JrDdOV9","https://drive.google.com/open?id=1rcjvwi4asF16e-9aKD4myKFbapaFXN4Z","https://drive.google.com/open?id=1i92eLwBgDZmzQXI0ti54ZzPGAQoYCukv","https://drive.google.com/open?id=1f4QXjc8YFf-79yZhba5UTOVc3jcCeiqJ"],placement:"Order as in 4th picture. Swan + flower on right shoulder. Stars on bottom left of right sleeve. Butterfly on inner wrist of left sleeve, medium.",quote:""},{name:"Hala Abu Ali",date:"24/02/2026",patches:3,links:["https://drive.google.com/open?id=1QQEkikOVHKeeeGXvAxOZmp5Q3941p0_G","https://drive.google.com/open?id=1vnxDYMDgzFsrWk1yTe8wRhknh_DNVhqf"],placement:"Flowers on the number. Other badge on the other hand.",quote:""},{name:"Hadi Hayek",date:"24/02/2026",patches:5,links:["https://drive.google.com/open?id=1mxC0EZGOL2qPI8u4SCWgOT6qr3QqZnEv","https://drive.google.com/open?id=17mTrKfxMwD0Pbvw-IcENtGoD","https://drive.google.com/open?id=186Hojdm-0B1wvbtPtmTfq5j3KMYNeErI","https://drive.google.com/open?id=1sUO8U6LDduaxCKGLa4oViZU8bLeebawo"],placement:"(الأفعى واليد) على اليد اليسار تحت 09. (المفتاح على الكرت) تحت الأفعى. الجمجمة على اليمين تحت الكتف. شعار المونستير تحته. شعار مكلارن برتقالي على الصدر اليمين. الحفاظ على التفصيل والألوان.",quote:"الابتلاء لا يأتي ليُهلكك، بل ليُطهّرك أو يرفعك.\n— الشيخ محمد متولي الشعراوي"},{name:"Khalid Salama",date:"25/02/2026",patches:4,links:["https://drive.google.com/open?id=1NiYaBs1kjSu9DcvVk8AhAwYXPVTi2qcl","https://drive.google.com/open?id=13_pP5kFWjbx_69A1YgY64O_ttCCHZuNu","https://drive.google.com/open?id=1Xv2W1nMOTH250FUuBUEVEGhJ23YuAlvM","https://drive.google.com/open?id=1MLn0pTWzPYwDc4mGCQtV67RK7OaP-xjO"],placement:"Right shoulder: top knees, 'Risk Rich' under. Left shoulder: drawing from top to sleeve, curves around hand twice.",quote:""},{name:"Salem",date:"25/02/2026",patches:5,links:["https://drive.google.com/open?id=1AY4VyEXUqwoNYGflzCQudYTQVFsVmseR","https://drive.google.com/open?id=1uSBUpeoMPQJ_p8LCZCPzAMSz7SL8dTEf","https://drive.google.com/open?id=1-qdk5di0VsulrjMUpImFT0dAcWCHs1Gm","https://drive.google.com/open?id=1TiIS3qIvqqEd1Ly1bQL1KaXQd-TJZNP1","https://drive.google.com/open?id=14lSEEuOO7W82LZGm5obRqXCzI9-0uR9m"],placement:"XII.XII.MMXXI on left sleeve. Mercedes car on left under 09. Card on right on top. BMW logo on right under the card.",quote:"Shoot for the moon. Even if you miss, you'll land among the stars."},{name:"Tareq Hamarsheh",date:"25/02/2026",patches:4,links:["https://drive.google.com/open?id=1rdRLTDivPI4i_SY76_0b83N6bF3H0ExA","https://drive.google.com/open?id=18aQCDSv_ZrxRBXfmVayKITYVLn0ney1L","https://drive.google.com/open?id=1UzqMM3ENMQyEVmLryzthVvzoH6kNEgM1"],placement:"Khabib under 09 on left arm. PlayStation top right. Cheetos under Khabib. Ball last.",quote:"Win or die trying."},{name:"Talia Assi",date:"25/02/2026",patches:4,links:["https://drive.google.com/open?id=1KarujRfMS-4Qj0lQs1QrT681vSmdcsJr","https://drive.google.com/open?id=1TM84K7XQOGqvH1VHlOJHdbEEQB-urqdI","https://drive.google.com/open?id=1wu66dFYh31rS5lffNhcATRXfxDjJA3p1","https://drive.google.com/open?id=1TowbOQLmLtl2DwKpV6I4QWVBwR9aBYed","https://drive.google.com/open?id=13fOQaqo4kODNVd6WyCu_QGv_QlooULrA"],placement:"Sent as a picture with the patches.",quote:"Sometimes I wish that I could freeze the picture and save it from the funny tricks of time."},{name:"Teeba Hijazi 2",date:"25/02/2026",patches:5,links:["https://drive.google.com/open?id=1nq3Db0rsHfR8v-6Pec99sMkou3UX0bLu","https://drive.google.com/open?id=13QX145NjcBn5z1UUX92ANCaHopVzTrKD","https://drive.google.com/open?id=11hyMjjWltUb5C-9lDFVSU1Za2TOri28I","https://drive.google.com/open?id=1goNMmFU9RUkjkNHobmzJF_5w0IgpDqHB","https://drive.google.com/open?id=1Ci1tWzXpFjOByzGmgj3ToltaJX-ZqsNa","https://drive.google.com/open?id=1TGvpbQM43ZPKFDIuFsrZ36vUo5BQn3T8"],placement:"Sent as picture. 09 arm: no patches on arm, small one at bottom of sleeve. Other hand: 3 patches + small one at bottom of sleeve.",quote:"All too well."},{name:"Abooshi",date:"25/02/2026",patches:3,links:["https://drive.google.com/open?id=1YEnP6PPvxtKU1DaxsDRCMq3zPm31LzRt","https://drive.google.com/open?id=1fNM7F8gSNPVrH7urAfF_RwQfP058kslD","https://drive.google.com/open?id=1hN8xNhXTUK9941coIvX2OKISF1_vYiV-"],placement:"Left hand under 09: the hat. Right hand top: 2 boys (no background). Under it: the bottle.",quote:"Over a parking space?"},{name:"Adam Ghoti",date:"25/02/2026",patches:2,links:["https://drive.google.com/open?id=1-Uims6Dum1Ba45y7mYtPE3PEPEc3IEqf","https://drive.google.com/open?id=12yBbPtAIXF3_dgB8bDlPibc"],placement:"Islam patch top right. Red Bull under 09 on left hand.",quote:""},{name:"Taleen Faqeeh",date:"25/02/2026",patches:"4 or 3",links:["https://drive.google.com/open?id=19BI-rxkb3PMGVZVOH5nN0fkmN2jJa_cV","https://drive.google.com/open?id=1OHfg5rKQcLslGiQDdlzrh0QTAhfq8CBx","https://drive.google.com/open?id=1-XfOwSyEeUBd_KqqfviHz5bKWN8BrTa3","https://drive.google.com/open?id=1O5q2RxuwERKMKMDrFjns4djOlp9KQ5dp","https://drive.google.com/open?id=1BiMLQjKgrHpA1xznP_23pkwIjN1m69c2","https://drive.google.com/open?id=1qWt_TvANPNhbIsEMXY_KX0GOmAeS4mOg"],placement:"Sent a picture with the patches to illustrate placement.",quote:""},{name:"Omar Mousa",date:"25/02/2026",patches:3,links:["https://drive.google.com/open?id=1SDzz8T0K6sqx5wKY7AIjSfNtyvUX_MU1","https://drive.google.com/open?id=1EtbPA1K03TXZHNKnS-DZ-ZS-HALywdAU","https://drive.google.com/open?id=1gGxpi4JH_78SW7YZTaiATrh-8kjU_QdP"],placement:"Astronaut on empty sleeve (keep star-like dots). Spotify code at very bottom of same sleeve near cuff. Statue (sticker 25 from PDF) on other sleeve, below 09.",quote:"Words may show a man's wit, but actions show his meaning.\n— Benjamin Franklin"},{name:"Yahya",date:"25/02/2026",patches:4,links:["https://drive.google.com/open?id=1reX0CQX8BzPuUERhe82CUhzfT2ZULpWB","https://drive.google.com/open?id=1HiaqISnQPVhnagHzjA3umpofg5qX72B4","https://drive.google.com/open?id=1xaa2j4JWEFvJEuwwlPqM59gCOC9HBdjq","https://drive.google.com/open?id=1InStPwIz-0MWqHzqFDlh4Vwl","https://drive.google.com/file/d/1SQgI-IXfyTZD8wDLMVyV7fbfsICeTf8X/view","https://drive.google.com/file/d/1FnzwQ2KSCV7hO_2FgOQe-DwywIasWoOw/view"],placement:"بلاستر المعلش عالشمال. القص البستوني على الصدر اليمين. Black Panther على اليمين فوق (حجم كبير). تحته Blue.",quote:"السبع سبع وان كُلت مخالبه\nوالكلب كلب وان طوقتُه الذهب"},{name:"Mohanad Shaltaf 2",date:"25/02/2026",patches:3,links:["https://drive.google.com/open?id=1EWD1xeX51wDyPaqHZ_DSfRpw5QQ3cEMt","https://drive.google.com/open?id=1mzT2mKZJBquXhYHL1vcwy1BAFRfA91Bh","https://drive.google.com/open?id=1HRcJ79GQQ4zmidhe2_zO39SrusCReHUT"],placement:"Porsche on one side. Harley Davidson on the other. Spotify on the back.",quote:"I don't chase dreams… I schedule them."},{name:"Sulieman Naasan",date:"26/02/2026",patches:4,links:["https://drive.google.com/open?id=1ZD6y9Hwv29cnS_m0ROvDEu6KsNOga-IA","https://drive.google.com/open?id=1AV-JnJVxBPNEEdah9zi6irVaWjHYBWSe","https://drive.google.com/open?id=1iPhysPLxTCfWGyO37Ix2qSkWgv0s4aPi","https://drive.google.com/open?id=19oKQg09gmvA1V6GROCp76bpHBtYiC0n8"],placement:"Risk Rich and Taekwondo at shoulders (Taekwondo on top). Beach on right bottom of sleeve, free (no frame), strong colors. Last image wraps around left arm like a snake near the hand — dark red with white or black outline.",quote:"نعسان بس صاحيلك"}];
+
+let currentFilter='all',currentSearch='',visibleOrders=[...ORDERS];
+
+function init(){
+  document.getElementById('total-count').textContent=ORDERS.length;
+  const tot=ORDERS.reduce((s,o)=>s+(parseInt(o.patches)||0),0);
+  document.getElementById('total-patches').textContent=tot;
+  renderGrid(ORDERS);
+  document.getElementById('count-badge').textContent=ORDERS.length+' orders';
+}
+
+function getInitials(n){return n.trim().split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase()}
+
+function setFilter(val,btn){
+  currentFilter=val;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  apply();
+}
+
+function filterOrders(q){currentSearch=q.toLowerCase();apply();}
+
+function apply(){
+  visibleOrders=ORDERS.filter(o=>{
+    const p=parseInt(o.patches)||0;
+    if(currentFilter!=='all'){
+      if(currentFilter==='5+'&&p<5)return false;
+      if(currentFilter!=='5+'&&p!==parseInt(currentFilter))return false;
+    }
+    if(currentSearch){
+      const h=`${o.name} ${o.quote} ${o.placement} ${o.date}`.toLowerCase();
+      if(!h.includes(currentSearch))return false;
+    }
+    return true;
+  });
+  renderGrid(visibleOrders);
+  document.getElementById('count-badge').textContent=`${visibleOrders.length} of ${ORDERS.length} orders`;
+}
+
+function renderGrid(orders){
+  const grid=document.getElementById('orders-grid');
+  const empty=document.getElementById('empty-state');
+  if(!orders.length){grid.innerHTML='';empty.style.display='block';return;}
+  empty.style.display='none';
+  grid.innerHTML=orders.map((o,i)=>{
+    const links=o.links.filter(l=>l&&l.startsWith('http'));
+    const chips=links.slice(0,4).map((l,li)=>`<a class="link-chip" href="${l}" target="_blank" rel="noopener" onclick="event.stopPropagation()">🔗 File ${li+1}</a>`).join('');
+    const more=links.length>4?`<span class="link-chip">+${links.length-4} more</span>`:'';
+    return `<div class="order-card" onclick="openModal(${i})" style="animation-delay:${Math.min(i*.04,.5)}s">
+      <div class="card-head">
+        <div class="card-avatar">${getInitials(o.name)}</div>
+        <div class="card-head-info">
+          <div class="card-name" title="${o.name}">${o.name}</div>
+          <div class="card-meta">
+            <span class="badge-patches">${o.patches} patch${o.patches==1?'':'es'}</span>
+            <span class="badge-date">${o.date}</span>
+          </div>
         </div>
-
-        <!-- ══ PASSWORD MODAL ══ -->
-        <div class="modal-overlay" id="modal-pw">
-            <div class="modal-box" id="modal-box">
-                <button class="modal-close" onclick="closeModal()">✕</button>
-                <div class="modal-icon" id="modal-icon">🔒</div>
-                <div class="modal-title" id="modal-title">Enter Password</div>
-                <div class="modal-sub" id="modal-sub">This vault is password protected.</div>
-                <div class="input-group">
-                    <span class="input-icon">🔑</span>
-                    <input type="password" id="pw-input" placeholder="Password" autocomplete="current-password"
-                        onkeydown="if(event.key==='Enter') verifyPassword()" />
-                    <button class="toggle-pw" onclick="togglePw()" title="Show/hide">👁</button>
-                </div>
-                <div class="error-msg" id="pw-error">Incorrect password. Try again.</div>
-                <button class="btn-primary" id="btn-unlock" onclick="verifyPassword()">Unlock Vault</button>
-            </div>
-        </div>
-
-        <!-- ══ ADMIN MODAL ══ -->
-        <div class="modal-overlay" id="modal-admin">
-            <div class="modal-box" style="--modal-accent: var(--gold);">
-                <button class="modal-close" onclick="closeAdminModal()">✕</button>
-                <div class="modal-icon">⚡</div>
-                <div class="modal-title">Admin Access</div>
-                <div class="modal-sub">Enter admin password to manage all notes.</div>
-                <div class="input-group">
-                    <span class="input-icon">🔐</span>
-                    <input type="password" id="admin-pw-input" placeholder="Admin password" autocomplete="current-password"
-                        onkeydown="if(event.key==='Enter') verifyAdminPassword()" />
-                    <button class="toggle-pw" onclick="toggleAdminPw()" title="Show/hide">👁</button>
-                </div>
-                <div class="error-msg" id="admin-error">Incorrect admin password.</div>
-                <button class="btn-primary" onclick="verifyAdminPassword()">Enter Admin Mode</button>
-            </div>
-        </div>
-
-        <!-- ══ NOTES SCREEN ══ -->
-        <div id="screen-notes">
-            <div class="notes-header">
-                <div class="notes-brand">
-                    <div class="notes-avatar" id="notes-avatar">W</div>
-                    <div>
-                        <div class="notes-user" id="notes-username">Waleed</div>
-                        <div class="notes-tagline">Private Notes Vault</div>
-                    </div>
-                </div>
-                <button class="btn-logout" onclick="logout()">⬅ Exit Vault</button>
-            </div>
-
-            <div class="notes-container">
-                <div class="notes-toolbar">
-                    <button class="btn-new-note" id="btn-new" onclick="toggleEditor()">＋ New Note</button>
-                    <div class="search-wrap">
-                        <span class="search-icon">🔍</span>
-                        <input class="search-bar" type="text" placeholder="Search notes…"
-                            oninput="filterNotes(this.value)" />
-                    </div>
-                </div>
-
-                <!-- Editor -->
-                <div class="note-editor" id="note-editor">
-                    <input class="editor-title-input" id="editor-title" placeholder="Note title…" maxlength="120" />
-                    <textarea class="editor-body-input" id="editor-body" placeholder="Write your note here…"></textarea>
-                    <div class="editor-actions">
-                        <button class="btn-cancel" onclick="cancelEdit()">Cancel</button>
-                        <button class="btn-save" id="btn-save" onclick="saveNote()">Save Note</button>
-                    </div>
-                </div>
-
-                <!-- Notes List -->
-                <div class="notes-list" id="notes-list">
-                    <div class="loading-notes">
-                        <div class="spinner"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-    </div>
-
-    <!-- TOAST -->
-    <div class="toast" id="toast"></div>
-
-    <script>
-        // ════════════════════════════════════════════
-        //  SUPABASE CONFIGURATION
-        //  → Replace the two values below with your
-        //    own Supabase project URL and anon key.
-        //  → Then run this SQL in the Supabase SQL editor:
-        /*
-          create table notes (
-            id          uuid primary key default gen_random_uuid(),
-            student_id  text not null,
-            title       text not null,
-            body        text,
-            created_at  timestamptz default now(),
-            updated_at  timestamptz default now()
-          );
-        
-          -- Enable Row Level Security
-          alter table notes enable row level security;
-        
-          -- Allow full access with anon key (since we do app-level auth)
-          create policy "allow all" on notes for all using (true);
-        */
-        // ════════════════════════════════════════════
-
-        const SUPABASE_URL = 'https://ejwqhywmmkhbvpuroowm.supabase.co';   // ← replace
-        const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVqd3FoeXdtbWtoYnZwdXJvb3dtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5NjI4ODYsImV4cCI6MjA5MDUzODg4Nn0.TJ8nlZ6U9lKPh-pPssKhQSdm2l7uM-Si69hGAVUBa5o';                       // ← replace
-
-        let db = null;
-
-        function initSupabase() {
-            if (window.supabase) {
-                const { createClient } = window.supabase;
-                db = createClient(SUPABASE_URL, SUPABASE_ANON);
-            }
-        }
-
-        initSupabase();
-
-        // ── STUDENT CONFIG ──
-        const STUDENTS_CONFIG = {
-            waleed1: { name: 'Waleed 1', password: 'admin', icon: '📚', accent: '#7b61ff', glow: 'rgba(123,97,255,0.2)' },
-            waleed2: { name: 'Waleed 2', password: 'admin', icon: '✏️', accent: '#ff6b6b', glow: 'rgba(255,107,107,0.2)' },
-            waleed3: { name: 'Waleed 3', password: 'admin', icon: '🔬', accent: '#00d9a3', glow: 'rgba(0,217,163,0.2)' },
-        };
-
-        let STUDENTS = {};
-        const ADMIN_PASSWORD = 'waleedface';
-
-        function initStudents() {
-            const deletedUsers = JSON.parse(localStorage.getItem('deleted_users') || '[]');
-            STUDENTS = {};
-            for (const [id, config] of Object.entries(STUDENTS_CONFIG)) {
-                if (!deletedUsers.includes(id)) {
-                    STUDENTS[id] = config;
-                }
-            }
-        }
-
-        initStudents();
-
-        // ── STATE ──
-        let currentStudent = null;
-        let allNotes = [];
-        let editingId = null;
-        let isAdmin = false;
-
-        // ── MODAL ──
-        function openModal(id) {
-            currentStudent = id;
-            const s = STUDENTS[id];
-            document.getElementById('modal-icon').textContent = s.icon;
-            document.getElementById('modal-title').textContent = s.name;
-            document.getElementById('modal-sub').textContent = `Enter the password for ${s.name}'s vault.`;
-            document.getElementById('modal-box').style.setProperty('--modal-accent', s.accent);
-            document.getElementById('pw-input').value = '';
-            document.getElementById('pw-error').classList.remove('show');
-            document.getElementById('modal-pw').classList.add('active');
-            setTimeout(() => document.getElementById('pw-input').focus(), 200);
-        }
-
-        function closeModal() {
-            document.getElementById('modal-pw').classList.remove('active');
-        }
-
-        function togglePw() {
-            const inp = document.getElementById('pw-input');
-            inp.type = inp.type === 'password' ? 'text' : 'password';
-        }
-
-        // ── ADMIN MODAL ──
-        function openAdminModal() {
-            document.getElementById('admin-pw-input').value = '';
-            document.getElementById('admin-error').classList.remove('show');
-            document.getElementById('modal-admin').classList.add('active');
-            setTimeout(() => document.getElementById('admin-pw-input').focus(), 200);
-        }
-
-        function closeAdminModal() {
-            document.getElementById('modal-admin').classList.remove('active');
-        }
-
-        function toggleAdminPw() {
-            const inp = document.getElementById('admin-pw-input');
-            inp.type = inp.type === 'password' ? 'text' : 'password';
-        }
-
-        function verifyAdminPassword() {
-            const val = document.getElementById('admin-pw-input').value.trim();
-            const err = document.getElementById('admin-error');
-            if (val === ADMIN_PASSWORD) {
-                isAdmin = true;
-                err.classList.remove('show');
-                closeAdminModal();
-                enterAdminMode();
-            } else {
-                err.classList.remove('show');
-                void err.offsetWidth;
-                err.classList.add('show');
-                document.getElementById('admin-pw-input').value = '';
-                document.getElementById('admin-pw-input').focus();
-            }
-        }
-
-        async function enterAdminMode() {
-            document.getElementById('student-grid').style.display = 'none';
-            document.getElementById('admin-notes-panel').style.display = 'block';
-            renderAdminUsers();
-            await loadAllNotes();
-        }
-
-        function renderAdminUsers() {
-            const grid = document.getElementById('admin-users-grid');
-            grid.innerHTML = Object.entries(STUDENTS).map(([id, s]) => {
-                const stored = JSON.parse(localStorage.getItem(`notes_${id}`) || '[]');
-                const noteCount = stored.length;
-                return `
-                <div class="admin-user-card">
-                    <div class="card-icon" style="background: color-mix(in srgb, ${s.accent} 15%, transparent); border: 1px solid color-mix(in srgb, ${s.accent} 30%, transparent);">${s.icon}</div>
-                    <div class="admin-user-info">
-                        <div class="admin-user-name">${s.name}</div>
-                        <div class="admin-user-label">${noteCount} note${noteCount !== 1 ? 's' : ''}</div>
-                    </div>
-                    <button class="btn-delete-user" onclick="deleteUser('${id}', event)" title="Delete User">🗑</button>
-                </div>
-            `}).join('');
-        }
-
-        async function deleteUser(userId, e) {
-            e.stopPropagation();
-            const user = STUDENTS[userId];
-            if (!confirm(`⚠️ Delete user "${user.name}" and ALL their notes? This cannot be undone!`)) return;
-            if (!confirm(`Are you REALLY sure? All notes for ${user.name} will be permanently deleted.`)) return;
-
-            if (!db) {
-                localStorage.removeItem(`notes_${userId}`);
-                localStorage.setItem('deleted_users', JSON.stringify([...JSON.parse(localStorage.getItem('deleted_users') || '[]'), userId]));
-                delete STUDENTS[userId];
-                renderAdminUsers();
-                await loadAllNotes();
-                showToast(`🗑️ User ${user.name} deleted`, 'success');
-                return;
-            }
-
-            try {
-                const { error } = await db.from('notes').delete().eq('student_id', userId);
-                if (error) throw error;
-                localStorage.setItem('deleted_users', JSON.stringify([...JSON.parse(localStorage.getItem('deleted_users') || '[]'), userId]));
-                delete STUDENTS[userId];
-                renderAdminUsers();
-                await loadAllNotes();
-                showToast(`🗑️ User ${user.name} deleted`, 'success');
-            } catch (err) {
-                console.error(err);
-                localStorage.removeItem(`notes_${userId}`);
-                localStorage.setItem('deleted_users', JSON.stringify([...JSON.parse(localStorage.getItem('deleted_users') || '[]'), userId]));
-                delete STUDENTS[userId];
-                renderAdminUsers();
-                await loadAllNotes();
-                showToast(`🗑️ User ${user.name} deleted`, 'success');
-            }
-        }
-
-        async function loadAllNotes() {
-            const list = document.getElementById('admin-notes-list');
-            list.innerHTML = '<div class="loading-notes"><div class="spinner"></div></div>';
-
-            if (!db) {
-                let all = [];
-                for (const sid in STUDENTS) {
-                    const stored = JSON.parse(localStorage.getItem(`notes_${sid}`) || '[]');
-                    all = all.concat(stored.map(n => ({ ...n, student_id: sid })));
-                }
-                allNotes = all.sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at));
-                renderAdminNotes(allNotes);
-                return;
-            }
-
-            try {
-                const { data, error } = await db.from('notes').select('*').order('updated_at', { ascending: false });
-                if (error) throw error;
-                allNotes = data || [];
-                allNotes = allNotes.filter(n => STUDENTS[n.student_id]);
-                renderAdminNotes(allNotes);
-            } catch (e) {
-                console.error(e);
-                let all = [];
-                for (const sid in STUDENTS) {
-                    const stored = JSON.parse(localStorage.getItem(`notes_${sid}`) || '[]');
-                    all = all.concat(stored.map(n => ({ ...n, student_id: sid })));
-                }
-                allNotes = all.sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at));
-                renderAdminNotes(allNotes);
-            }
-        }
-
-        function renderAdminNotes(notes) {
-            const list = document.getElementById('admin-notes-list');
-            if (!notes.length) {
-                list.innerHTML = '<div class="empty-state"><div class="empty-icon">📝</div><p>No notes in the system.</p></div>';
-                return;
-            }
-
-            list.innerHTML = notes.map((n, i) => `
-    <div class="note-card" style="animation-delay:${i * 0.05}s">
-      <div class="note-card-title">${escHtml(n.title)}</div>
-      <div class="note-card-body">${escHtml(n.body || 'No content')}</div>
-      <div class="note-card-meta">
-        <span class="note-card-date">
-            ${formatDate(n.updated_at)}
-            <span class="note-owner">${STUDENTS[n.student_id]?.name || n.student_id}</span>
-        </span>
-        <button class="btn-delete-note" onclick="adminDeleteNote('${n.id}', '${n.student_id}', event)" title="Delete">🗑</button>
+        <div class="card-order-num">${String(ORDERS.indexOf(o)+1).padStart(2,'0')}</div>
       </div>
-    </div>
-  `).join('');
-        }
-
-        function filterAdminNotes(q) {
-            const lq = q.toLowerCase();
-            const filtered = allNotes.filter(n =>
-                n.title.toLowerCase().includes(lq) || (n.body || '').toLowerCase().includes(lq) || (n.student_id || '').toLowerCase().includes(lq)
-            );
-            renderAdminNotes(filtered);
-        }
-
-        async function adminDeleteNote(id, studentId, e) {
-            e.stopPropagation();
-            if (!confirm('Delete this note?')) return;
-
-            if (!db) {
-                let stored = JSON.parse(localStorage.getItem(`notes_${studentId}`) || '[]');
-                stored = stored.filter(n => n.id !== id);
-                localStorage.setItem(`notes_${studentId}`, JSON.stringify(stored));
-                allNotes = allNotes.filter(n => n.id !== id);
-                renderAdminNotes(allNotes);
-                showToast('🗑️ Note deleted', 'success');
-                return;
-            }
-
-            try {
-                const { error } = await db.from('notes').delete().eq('id', id);
-                if (error) throw error;
-                allNotes = allNotes.filter(n => n.id !== id);
-                renderAdminNotes(allNotes);
-                showToast('🗑️ Note deleted', 'success');
-            } catch {
-                console.log('Supabase delete failed, falling back to localStorage');
-                let stored = JSON.parse(localStorage.getItem(`notes_${studentId}`) || '[]');
-                stored = stored.filter(n => n.id !== id);
-                localStorage.setItem(`notes_${studentId}`, JSON.stringify(stored));
-                allNotes = allNotes.filter(n => n.id !== id);
-                renderAdminNotes(allNotes);
-                showToast('🗑️ Note deleted', 'success');
-            }
-        }
-
-        function verifyPassword() {
-            const val = document.getElementById('pw-input').value.trim();
-            const err = document.getElementById('pw-error');
-            const btn = document.getElementById('btn-unlock');
-            if (!currentStudent) return;
-            if (val === STUDENTS[currentStudent].password) {
-                err.classList.remove('show');
-                const studentId = currentStudent;
-                closeModal();
-                enterVault(studentId);
-            } else {
-                err.classList.remove('show');
-                void err.offsetWidth;
-                err.classList.add('show');
-                document.getElementById('pw-input').value = '';
-                document.getElementById('pw-input').focus();
-            }
-        }
-
-        // ── VAULT ──
-        function enterVault(id) {
-            const s = STUDENTS[id];
-            currentStudent = id;
-
-            // Apply accent
-            document.documentElement.style.setProperty('--user-accent', s.accent);
-
-            // Avatar
-            const av = document.getElementById('notes-avatar');
-            av.textContent = s.icon;
-            av.style.background = `color-mix(in srgb, ${s.accent} 18%, transparent)`;
-            av.style.border = `1px solid color-mix(in srgb, ${s.accent} 35%, transparent)`;
-
-            document.getElementById('notes-username').textContent = s.name;
-            document.getElementById('screen-landing').style.display = 'none';
-            document.getElementById('screen-notes').classList.add('active');
-
-            cancelEdit();
-            loadNotes();
-        }
-
-        function logout() {
-            currentStudent = null;
-            isAdmin = false;
-            allNotes = [];
-            initStudents();
-            document.getElementById('screen-notes').classList.remove('active');
-            document.getElementById('screen-landing').style.display = 'flex';
-            document.getElementById('student-grid').style.display = 'grid';
-            document.getElementById('admin-notes-panel').style.display = 'none';
-            document.getElementById('notes-list').innerHTML = '<div class="loading-notes"><div class="spinner"></div></div>';
-            document.getElementById('admin-badge').style.display = 'none';
-            renderStudentGrid();
-        }
-
-        function renderStudentGrid() {
-            const grid = document.getElementById('student-grid');
-            const cards = Object.entries(STUDENTS).map(([id, s], i) => `
-                <div class="student-card" onclick="openModal('${id}')">
-                    <div class="card-number">0${i + 1}</div>
-                    <div class="card-icon">${s.icon}</div>
-                    <div class="card-name">${s.name}</div>
-                    <div class="card-label">Student Vault</div>
-                    <div class="card-arrow">→</div>
-                </div>
-            `).join('');
-            grid.innerHTML = cards;
-        }
-
-        // ── NOTES CRUD (Supabase) ──
-        async function loadNotes() {
-            document.getElementById('notes-list').innerHTML = '<div class="loading-notes"><div class="spinner"></div></div>';
-
-            if (!db) {
-                // Fallback to localStorage if Supabase not initialized
-                if (isAdmin) {
-                    let all = [];
-                    for (const sid in STUDENTS) {
-                        const stored = JSON.parse(localStorage.getItem(`notes_${sid}`) || '[]');
-                        all = all.concat(stored.map(n => ({ ...n, _owner: sid })));
-                    }
-                    allNotes = all.sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at));
-                } else {
-                    const stored = JSON.parse(localStorage.getItem(`notes_${currentStudent}`) || '[]');
-                    allNotes = stored;
-                }
-                renderNotes(allNotes);
-                return;
-            }
-
-            try {
-                let data, error;
-                if (isAdmin) {
-                    ({ data, error } = await db.from('notes').select('*').order('updated_at', { ascending: false }));
-                    if (error) throw error;
-                    allNotes = data || [];
-                } else {
-                    ({ data, error } = await db
-                        .from('notes')
-                        .select('*')
-                        .eq('student_id', currentStudent)
-                        .order('updated_at', { ascending: false }));
-                    if (error) throw error;
-                    allNotes = data || [];
-                }
-                renderNotes(allNotes);
-            } catch (e) {
-                console.error(e);
-                // Fallback to localStorage if Supabase fails
-                if (isAdmin) {
-                    let all = [];
-                    for (const sid in STUDENTS) {
-                        const stored = JSON.parse(localStorage.getItem(`notes_${sid}`) || '[]');
-                        all = all.concat(stored.map(n => ({ ...n, _owner: sid })));
-                    }
-                    allNotes = all.sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at));
-                } else {
-                    const stored = JSON.parse(localStorage.getItem(`notes_${currentStudent}`) || '[]');
-                    allNotes = stored;
-                }
-                renderNotes(allNotes);
-                if (SUPABASE_URL.includes('YOUR_PROJECT')) {
-                    showToast('ℹ️ Using local storage (Supabase not configured)', 'success');
-                }
-            }
-        }
-
-        async function saveNote() {
-            const title = document.getElementById('editor-title').value.trim();
-            const body = document.getElementById('editor-body').value.trim();
-            if (!title) { document.getElementById('editor-title').focus(); return; }
-
-            const btn = document.getElementById('btn-save');
-            btn.innerHTML = '<span class="spinner"></span>';
-            btn.disabled = true;
-
-            // Use localStorage if db not initialized
-            if (!db) {
-                let stored = JSON.parse(localStorage.getItem(`notes_${currentStudent}`) || '[]');
-                if (editingId) {
-                    stored = stored.map(n => n.id === editingId ? { ...n, title, body, updated_at: new Date().toISOString() } : n);
-                } else {
-                    stored.unshift({ id: crypto.randomUUID(), student_id: currentStudent, title, body, created_at: new Date().toISOString(), updated_at: new Date().toISOString() });
-                }
-                localStorage.setItem(`notes_${currentStudent}`, JSON.stringify(stored));
-                allNotes = stored;
-                renderNotes(allNotes);
-                cancelEdit();
-                showToast('✅ Note saved locally!', 'success');
-                btn.innerHTML = 'Save Note';
-                btn.disabled = false;
-                return;
-            }
-
-            try {
-                if (editingId) {
-                    const { error } = await db.from('notes').update({ title, body, updated_at: new Date().toISOString() }).eq('id', editingId);
-                    if (error) throw error;
-                } else {
-                    const { error } = await db.from('notes').insert({ student_id: currentStudent, title, body });
-                    if (error) throw error;
-                }
-                cancelEdit();
-                await loadNotes();
-                showToast('✅ Note saved!', 'success');
-            } catch (e) {
-                // Fallback localStorage
-                let stored = JSON.parse(localStorage.getItem(`notes_${currentStudent}`) || '[]');
-                if (editingId) {
-                    stored = stored.map(n => n.id === editingId ? { ...n, title, body, updated_at: new Date().toISOString() } : n);
-                } else {
-                    stored.unshift({ id: crypto.randomUUID(), student_id: currentStudent, title, body, created_at: new Date().toISOString(), updated_at: new Date().toISOString() });
-                }
-                localStorage.setItem(`notes_${currentStudent}`, JSON.stringify(stored));
-                allNotes = stored;
-                renderNotes(allNotes);
-                cancelEdit();
-                showToast('✅ Note saved locally!', 'success');
-            }
-
-            btn.innerHTML = 'Save Note';
-            btn.disabled = false;
-        }
-
-        async function deleteNote(id, e) {
-            e.stopPropagation();
-            if (!confirm('Delete this note?')) return;
-
-            // Use localStorage if db not initialized
-            if (!db) {
-                let stored = JSON.parse(localStorage.getItem(`notes_${currentStudent}`) || '[]');
-                stored = stored.filter(n => n.id !== id);
-                localStorage.setItem(`notes_${currentStudent}`, JSON.stringify(stored));
-                allNotes = stored;
-                renderNotes(allNotes);
-                showToast('🗑️ Note deleted', 'success');
-                return;
-            }
-
-            try {
-                const { error } = await db.from('notes').delete().eq('id', id);
-                if (error) throw error;
-                await loadNotes();
-                showToast('🗑️ Note deleted', 'success');
-            } catch {
-                // Fallback
-                let stored = JSON.parse(localStorage.getItem(`notes_${currentStudent}`) || '[]');
-                stored = stored.filter(n => n.id !== id);
-                localStorage.setItem(`notes_${currentStudent}`, JSON.stringify(stored));
-                allNotes = stored;
-                renderNotes(allNotes);
-                showToast('🗑️ Note deleted', 'success');
-            }
-        }
-
-        function editNote(note) {
-            editingId = note.id;
-            document.getElementById('editor-title').value = note.title;
-            document.getElementById('editor-body').value = note.body || '';
-            const editor = document.getElementById('note-editor');
-            editor.classList.add('open');
-            document.getElementById('btn-save').textContent = 'Update Note';
-            document.getElementById('editor-title').focus();
-            editor.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-
-        // ── EDITOR ──
-        function toggleEditor() {
-            editingId = null;
-            const editor = document.getElementById('note-editor');
-            if (editor.classList.contains('open')) { cancelEdit(); return; }
-            editor.classList.add('open');
-            document.getElementById('editor-title').value = '';
-            document.getElementById('editor-body').value = '';
-            document.getElementById('btn-save').textContent = 'Save Note';
-            document.getElementById('editor-title').focus();
-        }
-
-        function cancelEdit() {
-            editingId = null;
-            document.getElementById('note-editor').classList.remove('open');
-            document.getElementById('editor-title').value = '';
-            document.getElementById('editor-body').value = '';
-            document.getElementById('btn-save').textContent = 'Save Note';
-        }
-
-        // ── RENDER ──
-        function renderNotes(notes) {
-            const list = document.getElementById('notes-list');
-            if (!notes.length) {
-                list.innerHTML = `
-      <div class="empty-state">
-        <div class="empty-icon">📝</div>
-        <p>No notes yet. Hit <strong>+ New Note</strong> to get started!</p>
-      </div>`;
-                return;
-            }
-
-            list.innerHTML = notes.map((n, i) => {
-                const ownerLabel = isAdmin && n._owner ? `<span class="note-owner">${STUDENTS[n._owner]?.name || n._owner}</span>` : '';
-                return `
-    <div class="note-card" onclick="editNote(${JSON.stringify(n).split('"').join('&quot;')})" style="animation-delay:${i * 0.05}s">
-      <div class="note-card-title">${escHtml(n.title)}</div>
-      <div class="note-card-body">${escHtml(n.body || 'No content')}</div>
-      <div class="note-card-meta">
-        <span class="note-card-date">${formatDate(n.updated_at)}${ownerLabel}</span>
-        <button class="btn-delete-note" onclick="deleteNote('${n.id}', event)" title="Delete">🗑</button>
+      <div class="card-body">
+        ${o.placement?`<div class="section-label">Placement</div><div class="placement-text">${o.placement}</div>`:''}
+        ${o.quote?`<div class="quote-block">${o.quote}</div>`:''}
       </div>
-    </div>
-  `}).join('');
-        }
+      ${links.length?`<div class="links-row">${chips}${more}</div>`:''}
+    </div>`;
+  }).join('');
+}
 
-        function filterNotes(q) {
-            const lq = q.toLowerCase();
-            const filtered = allNotes.filter(n =>
-                n.title.toLowerCase().includes(lq) || (n.body || '').toLowerCase().includes(lq)
-            );
-            renderNotes(filtered);
-        }
+function openModal(idx){
+  const o=visibleOrders[idx];
+  if(!o)return;
+  const gi=ORDERS.indexOf(o);
+  const links=o.links.filter(l=>l&&l.startsWith('http'));
+  document.getElementById('modal-header').innerHTML=`
+    <div class="modal-order-num">ORDER #${String(gi+1).padStart(2,'0')} · ${o.date}</div>
+    <div class="modal-name">${o.name}</div>
+    <div class="card-meta"><span class="badge-patches">${o.patches} patch${o.patches==1?'':'es'}</span></div>`;
+  let body='';
+  if(o.placement)body+=`<div class="modal-section"><div class="modal-section-title">Placement Instructions</div><div class="modal-text">${o.placement}</div></div>`;
+  if(o.quote)body+=`<div class="modal-section"><div class="modal-section-title">Quote</div><div class="modal-quote">${o.quote}</div></div>`;
+  if(links.length)body+=`<div class="modal-section"><div class="modal-section-title">Reference Files (${links.length})</div><div class="modal-links">${links.map((l,i)=>`<a class="modal-link" href="${l}" target="_blank" rel="noopener">🔗 File ${i+1}</a>`).join('')}</div></div>`;
+  document.getElementById('modal-body').innerHTML=body;
+  document.getElementById('modal').classList.add('open');
+  document.body.style.overflow='hidden';
+}
 
-        // ── UTILS ──
-        function escHtml(s) {
-            return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-        }
-
-        function formatDate(iso) {
-            if (!iso) return '';
-            const d = new Date(iso);
-            return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
-        }
-
-        let toastTimer;
-        function showToast(msg, type = 'success') {
-            const t = document.getElementById('toast');
-            t.textContent = msg;
-            t.className = `toast ${type} show`;
-            clearTimeout(toastTimer);
-            toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
-        }
-
-        // Close modal on overlay click
-        document.getElementById('modal-pw').addEventListener('click', function (e) {
-            if (e.target === this) closeModal();
-        });
-
-        document.getElementById('modal-admin').addEventListener('click', function (e) {
-            if (e.target === this) closeAdminModal();
-        });
-
-        document.addEventListener('DOMContentLoaded', renderStudentGrid);
-    </script>
+function handleOverlayClick(e){if(e.target===document.getElementById('modal'))closeModal();}
+function closeModal(){document.getElementById('modal').classList.remove('open');document.body.style.overflow='';}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
+init();
+</script>
 </body>
-
 </html>
