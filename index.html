@@ -1085,17 +1085,17 @@
         // ════════════════════════════════════════════
 
         const SUPABASE_URL = 'https://ejwqhywmmkhbvpuroowm.supabase.co';   // ← replace
-        const SUPABASE_ANON = 'sb_publishable_vMG32X-EXlFoZBc98LFTog_Rtr1VgaX';                       // ← replace
+        const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVqd3FoeXdtbWtoYnZwdXJvb3dtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5NjI4ODYsImV4cCI6MjA5MDUzODg4Nn0.TJ8nlZ6U9lKPh-pPssKhQSdm2l7uM-Si69hGAVUBa5o';                       // ← replace
 
         let db = null;
-        
+
         function initSupabase() {
             if (window.supabase) {
                 const { createClient } = window.supabase;
                 db = createClient(SUPABASE_URL, SUPABASE_ANON);
             }
         }
-        
+
         initSupabase();
 
         // ── STUDENT CONFIG ──
@@ -1184,7 +1184,7 @@
         // ── NOTES CRUD (Supabase) ──
         async function loadNotes() {
             document.getElementById('notes-list').innerHTML = '<div class="loading-notes"><div class="spinner"></div></div>';
-            
+
             if (!db) {
                 // Fallback to localStorage if Supabase not initialized
                 const stored = JSON.parse(localStorage.getItem(`notes_${currentStudent}`) || '[]');
@@ -1192,7 +1192,7 @@
                 renderNotes(allNotes);
                 return;
             }
-            
+
             try {
                 const { data, error } = await db
                     .from('notes')
