@@ -7,8 +7,13 @@ const CONFIG = {
     TMDB_BASE: 'https://api.themoviedb.org/3',
     IMG_BASE: 'https://image.tmdb.org/t/p',
     
-    // Vidking Configuration
-    VIDKING_BASE: 'https://vidking.net/embed',
+  // Embed Sources
+  SOURCES: [
+    { name: 'VidKing', type: 'path', base: 'https://vidking.net/embed' },
+    { name: 'VidSrc.me', type: 'path', base: 'https://vidsrc.me/embed' },
+    { name: 'VidLink', type: 'path', base: 'https://vidlink.pro' },
+    { name: 'VidSrc.cc', type: 'segment', base: 'https://vidsrc.cc/embed' },
+  ],
     
     // Supabase Configuration
     SUPABASE_URL: 'https://ucpkihzsjobnvemxgtpa.supabase.co',
