@@ -2624,8 +2624,9 @@
           : 'https://via.placeholder.com/46x69/111120/ff1744?text=?';
         const date = new Date(it.watched_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
         const badge = it.media_type === 'tv' ? 'TV' : 'Movie';
+        const encodedIt = encodeURIComponent(JSON.stringify(it)).replace(/'/g, "%27");
         return `
-<div class="history-item" onclick="playFromHistory(${JSON.stringify(it).replace(/"/g, '&quot;')})">
+<div class="history-item" onclick="playFromHistory('${encodedIt}')">
   <img class="history-poster" src="${poster}" alt="${escHtml(it.title)}" loading="lazy" />
   <div class="history-info">
     <div class="history-title">${escHtml(it.title)}</div>
@@ -2665,12 +2666,12 @@
           poster_path: it.poster_path,
           first_air_date: it.media_type === 'tv' ? ' ' : undefined,
         };
-        const dataAttr = JSON.stringify(fakeItem).replace(/"/g, '&quot;');
+        const dataAttr = encodeURIComponent(JSON.stringify(fakeItem)).replace(/'/g, "%27");
         return `
 <div class="continue-card">
   <div class="continue-thumb">
     <img src="${backdrop}" alt="${escHtml(it.title)}" loading="lazy" />
-    <div class="continue-overlay" onclick="playFromContinue(${dataAttr})">
+    <div class="continue-overlay" onclick="playFromContinue('${dataAttr}')">
       <div class="continue-play-icon">
         <i data-lucide="play" style="width:18px;height:18px;fill:currentColor;"></i>
       </div>
@@ -2682,7 +2683,7 @@
       <i data-lucide="x" style="width:11px;height:11px;"></i>
     </button>
   </div>
-  <div class="continue-info" onclick="playFromContinue(${dataAttr})">
+  <div class="continue-info" onclick="playFromContinue('${dataAttr}')">
     <div class="continue-title">${escHtml(it.title)}</div>
     <div class="continue-meta">
       <span class="continue-badge">${badge}</span>
@@ -2695,7 +2696,11 @@
     }
 
     function playFromContinue(item) {
-      if (typeof item === 'string') { try { item = JSON.parse(item); } catch (e) { return; } }
+      if (typeof item === 'string') {
+        try { item = JSON.parse(decodeURIComponent(item)); } catch (e) {
+          try { item = JSON.parse(item); } catch (err) { return; }
+        }
+      }
       openPlayer(item);
     }
 
@@ -2712,6 +2717,11 @@
 
     function playFromHistory(it) {
       closeHistory();
+      if (typeof it === 'string') {
+        try { it = JSON.parse(decodeURIComponent(it)); } catch (e) {
+          try { it = JSON.parse(it); } catch (err) { return; }
+        }
+      }
       const fakeItem = {
         id: it.tmdb_id,
         title: it.media_type === 'movie' ? it.title : undefined,
@@ -2992,8 +3002,9 @@
         ? `${IMG_BASE}/w342${item.poster_path}`
         : 'https://via.placeholder.com/342x513/111120/ff1744?text=No+Image';
 
+      const encodedItem = encodeURIComponent(JSON.stringify(item)).replace(/'/g, "%27");
       return `
-<div class="nfx-card" onclick="openPlayer(${JSON.stringify(item).replace(/"/g, '&quot;')})">
+<div class="nfx-card" onclick="openPlayer('${encodedItem}')">
   <div class="nfx-card-inner">
     <img class="nfx-card-poster" src="${poster}" alt="${title}" loading="lazy" />
     <div class="nfx-card-overlay">
@@ -3028,7 +3039,13 @@
 
     // ─── PLAYER / MODAL ──────────────────────────────────────────────────────────
     async function openPlayer(item) {
-      if (typeof item === 'string') { try { item = JSON.parse(item); } catch (e) { return; } }
+      if (typeof item === 'string') {
+        try {
+          item = JSON.parse(decodeURIComponent(item));
+        } catch (e) {
+          try { item = JSON.parse(item); } catch (err) { return; }
+        }
+      }
       currentItem = item;
       currentSourceIndex = 0;
       const isTV = !!(item.first_air_date || item.name && !item.title);
