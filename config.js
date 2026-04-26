@@ -9,10 +9,10 @@ const CONFIG = {
     
   // Embed Sources
   SOURCES: [
-    { name: 'VidKing', type: 'path', base: 'https://vidking.net/embed' },
-    { name: 'VidSrc.me', type: 'path', base: 'https://vidsrc.me/embed' },
-    { name: 'VidLink', type: 'path', base: 'https://vidlink.pro' },
-    { name: 'VidSrc.cc', type: 'segment', base: 'https://vidsrc.cc/embed' },
+    { name: 'Server 1', type: 'path', base: 'https://vidking.net/embed' },
+    { name: 'Server 2', type: 'path', base: 'https://vidsrc.me/embed' },
+    { name: 'Server 3', type: 'path', base: 'https://vidlink.pro' },
+    { name: 'Server 4', type: 'segment', base: 'https://vidsrc.cc/embed' },
   ],
     
     // Supabase Configuration
