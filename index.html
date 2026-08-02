@@ -7,7 +7,6 @@
   <title>WaleedFlixer</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <script src="config.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -52,6 +51,7 @@
       overflow-x: hidden;
       -webkit-font-smoothing: antialiased;
       cursor: default;
+      padding-top: 72px;
     }
 
 
@@ -284,145 +284,6 @@
       box-shadow: 0 2px 12px rgba(255, 23, 68, 0.4);
     }
 
-    /* ── NAV AUTH ── */
-    .nav-auth {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      flex-shrink: 0;
-    }
-
-    .btn-auth {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 0.4rem 1rem;
-      border-radius: 10px;
-      font-size: 0.78rem;
-      font-weight: 600;
-      cursor: pointer;
-      border: none;
-      transition: all 0.25s;
-      font-family: 'Outfit', sans-serif;
-    }
-
-    .btn-auth-outline {
-      background: transparent;
-      color: var(--text);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-    }
-
-    .btn-auth-outline:hover {
-      border-color: rgba(255, 255, 255, 0.4);
-      background: rgba(255, 255, 255, 0.05);
-    }
-
-    .btn-auth-fill {
-      background: var(--red);
-      color: #fff;
-      box-shadow: 0 2px 12px rgba(255, 23, 68, 0.35);
-    }
-
-    .btn-auth-fill:hover {
-      background: var(--red2);
-      box-shadow: 0 4px 20px rgba(255, 23, 68, 0.5);
-      transform: translateY(-1px);
-    }
-
-    .user-avatar {
-      width: 36px;
-      height: 36px;
-      border-radius: 10px;
-      background: linear-gradient(135deg, var(--red), #ff6b6b);
-      color: #fff;
-      font-weight: 700;
-      font-size: 0.85rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      border: 2px solid transparent;
-      transition: all 0.25s;
-      box-shadow: 0 2px 10px rgba(255, 23, 68, 0.3);
-    }
-
-    .user-avatar:hover {
-      border-color: rgba(255, 255, 255, 0.4);
-      transform: scale(1.05);
-    }
-
-    .user-menu {
-      position: relative;
-    }
-
-    .user-dropdown {
-      position: absolute;
-      top: calc(100% + 10px);
-      right: 0;
-      background: rgba(13, 13, 24, 0.97);
-      backdrop-filter: blur(20px);
-      border: 1px solid var(--glass-border);
-      border-radius: 14px;
-      min-width: 190px;
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.03);
-      display: none;
-      flex-direction: column;
-      overflow: hidden;
-      z-index: 300;
-      animation: dropIn 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-    }
-
-    @keyframes dropIn {
-      from {
-        opacity: 0;
-        transform: scale(0.95) translateY(-8px);
-      }
-
-      to {
-        opacity: 1;
-        transform: scale(1) translateY(0);
-      }
-    }
-
-    .user-dropdown.open {
-      display: flex;
-    }
-
-    .user-dropdown-email {
-      padding: 0.85rem 1rem;
-      font-size: 0.72rem;
-      color: var(--muted2);
-      border-bottom: 1px solid var(--glass-border);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      font-weight: 500;
-    }
-
-    .user-dropdown-item {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 0.7rem 1rem;
-      font-size: 0.82rem;
-      color: var(--text);
-      cursor: pointer;
-      background: none;
-      border: none;
-      width: 100%;
-      text-align: left;
-      transition: background 0.15s;
-      font-family: 'Outfit', sans-serif;
-    }
-
-    .user-dropdown-item:hover {
-      background: rgba(255, 255, 255, 0.06);
-    }
-
-    .user-dropdown-item.danger {
-      color: #ff6b6b;
-    }
-
     /* ══════════════════════════════════ HERO ══════════════════════════════════ */
     .hero {
       position: relative;
@@ -431,6 +292,7 @@
       display: flex;
       align-items: flex-end;
       overflow: hidden;
+      background: linear-gradient(135deg, var(--surface) 0%, var(--dark) 40%, var(--surface2) 100%);
     }
 
     .hero-bg {
@@ -471,7 +333,7 @@
 
     .hero-content {
       position: relative;
-      z-index: 2;
+      z-index: 10;
       padding: 0 5% 13vh;
       width: 100%;
       max-width: 680px;
@@ -659,52 +521,6 @@
       margin-top: -10vh;
     }
 
-    /* ── GENRE BAR ── */
-    .genre-bar-wrap {
-      padding: 0 4%;
-      margin-bottom: 2.5rem;
-    }
-
-    .genre-scroll {
-      display: flex;
-      gap: 8px;
-      overflow-x: auto;
-      padding-bottom: 4px;
-      scrollbar-width: none;
-    }
-
-    .genre-scroll::-webkit-scrollbar {
-      display: none;
-    }
-
-    .genre-chip {
-      flex-shrink: 0;
-      padding: 7px 18px;
-      border-radius: 99px;
-      font-size: 0.78rem;
-      font-weight: 600;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      color: var(--muted2);
-      cursor: pointer;
-      transition: all 0.25s;
-      white-space: nowrap;
-      font-family: 'Outfit', sans-serif;
-    }
-
-    .genre-chip:hover {
-      border-color: rgba(255, 255, 255, 0.25);
-      color: var(--text);
-      background: rgba(255, 255, 255, 0.08);
-    }
-
-    .genre-chip.active {
-      background: var(--red);
-      border-color: var(--red);
-      color: #fff;
-      box-shadow: 0 2px 15px rgba(255, 23, 68, 0.35);
-    }
-
     /* ══════════════════════════════ ROW SECTIONS ══════════════════════════════ */
     .nfx-row-section {
       margin-bottom: 2.5rem;
@@ -732,6 +548,39 @@
 
     .nfx-row-title span {
       color: var(--red);
+    }
+
+    .search-count {
+      font-size: 0.75rem;
+      color: var(--muted);
+      font-weight: 400;
+      white-space: nowrap;
+    }
+
+    .nfx-row-section.searching {
+      margin-top: 3rem;
+      padding-top: 1rem;
+    }
+
+    .nfx-row-section.searching .nfx-row-header {
+      padding: 0 4%;
+    }
+
+    .nfx-row-section.searching .nfx-row-title {
+      font-size: 1.1rem;
+    }
+
+    .nfx-row-section.searching .nfx-row-title::before {
+      display: none;
+    }
+
+    .nfx-row-section.searching .nfx-row-title span {
+      color: var(--text);
+    }
+
+    .main-content.search-active {
+      margin-top: 0;
+      padding-top: 1.5rem;
     }
 
     .nfx-row-tag {
@@ -1220,206 +1069,6 @@
       box-shadow: 0 0 8px var(--red-glow);
     }
 
-    /* ══════════════════════════════ AUTH MODAL ══════════════════════════════ */
-    .auth-backdrop {
-      position: fixed;
-      inset: 0;
-      z-index: 600;
-      background: rgba(0, 0, 0, 0.9);
-      backdrop-filter: blur(20px);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 1rem;
-    }
-
-    .auth-backdrop.open {
-      display: flex;
-    }
-
-    .auth-box {
-      width: 100%;
-      max-width: 410px;
-      background: rgba(13, 13, 24, 0.98);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 20px;
-      overflow: hidden;
-      animation: modalIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
-      box-shadow: 0 40px 80px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.03);
-      position: relative;
-    }
-
-    /* Red glow on auth box */
-    .auth-box::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 60%;
-      height: 2px;
-      background: linear-gradient(90deg, transparent, var(--red), transparent);
-    }
-
-    .auth-header {
-      padding: 2rem 2rem 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
-    }
-
-    .auth-brand {
-      font-family: 'Syne', sans-serif;
-      font-size: 1.9rem;
-      font-weight: 800;
-      color: #fff;
-      margin-bottom: 0.3rem;
-      letter-spacing: -0.03em;
-    }
-
-    .auth-brand .w-accent {
-      color: var(--red);
-      text-shadow: 0 0 20px var(--red-glow);
-    }
-
-    .auth-sub {
-      font-size: 0.78rem;
-      color: var(--muted2);
-      margin-bottom: 1.5rem;
-      font-weight: 400;
-    }
-
-    .auth-tabs {
-      display: flex;
-      gap: 0;
-      width: 100%;
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid var(--glass-border);
-      border-radius: 12px;
-      padding: 4px;
-      margin-bottom: 1.5rem;
-    }
-
-    .auth-tab {
-      flex: 1;
-      padding: 0.5rem;
-      border-radius: 9px;
-      font-size: 0.8rem;
-      font-weight: 700;
-      cursor: pointer;
-      border: none;
-      background: transparent;
-      color: var(--muted2);
-      transition: all 0.25s;
-      font-family: 'Outfit', sans-serif;
-    }
-
-    .auth-tab.active {
-      background: var(--red);
-      color: #fff;
-      box-shadow: 0 2px 12px rgba(255, 23, 68, 0.4);
-    }
-
-    .auth-body {
-      padding: 0 2rem 2rem;
-    }
-
-    .auth-field {
-      margin-bottom: 1rem;
-    }
-
-    .auth-label {
-      display: block;
-      font-size: 0.7rem;
-      font-weight: 700;
-      color: var(--muted2);
-      margin-bottom: 7px;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-    }
-
-    .auth-input {
-      width: 100%;
-      padding: 0.7rem 1rem;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 12px;
-      color: #fff;
-      font-family: 'Outfit', sans-serif;
-      font-size: 0.875rem;
-      outline: none;
-      transition: all 0.25s;
-    }
-
-    .auth-input:focus {
-      border-color: rgba(255, 23, 68, 0.5);
-      background: rgba(255, 255, 255, 0.07);
-      box-shadow: 0 0 0 3px rgba(255, 23, 68, 0.1);
-    }
-
-    .auth-input::placeholder {
-      color: rgba(107, 107, 136, 0.6);
-    }
-
-    .auth-submit {
-      width: 100%;
-      padding: 0.8rem;
-      background: linear-gradient(135deg, var(--red), var(--red2));
-      color: #fff;
-      font-weight: 700;
-      font-size: 0.9rem;
-      border: none;
-      border-radius: 12px;
-      cursor: pointer;
-      transition: all 0.25s;
-      margin-top: 0.5rem;
-      font-family: 'Outfit', sans-serif;
-      box-shadow: 0 4px 20px rgba(255, 23, 68, 0.35);
-      letter-spacing: 0.01em;
-    }
-
-    .auth-submit:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 30px rgba(255, 23, 68, 0.5);
-    }
-
-    .auth-submit:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-      transform: none;
-    }
-
-    .auth-error {
-      color: #ff6b6b;
-      font-size: 0.78rem;
-      margin-top: 0.75rem;
-      text-align: center;
-      min-height: 1.2em;
-    }
-
-    .auth-close {
-      position: absolute;
-      top: 1.1rem;
-      right: 1.1rem;
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 50%;
-      width: 34px;
-      height: 34px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      color: var(--muted2);
-      transition: all 0.2s;
-    }
-
-    .auth-close:hover {
-      background: rgba(255, 23, 68, 0.15);
-      color: var(--red);
-    }
-
     /* ══════════════════════════════ HISTORY PANEL ══════════════════════════════ */
     .history-backdrop {
       position: fixed;
@@ -1579,182 +1228,6 @@
       background: rgba(255, 23, 68, 0.15);
     }
 
-    /* ══════════════════════════════ CONTINUE WATCHING ══════════════════════════════ */
-    .continue-section {
-      margin-bottom: 2.5rem;
-      display: none;
-    }
-
-    .continue-section.has-items {
-      display: block;
-    }
-
-    .continue-row {
-      display: flex;
-      gap: 12px;
-      overflow-x: auto;
-      scrollbar-width: none;
-      padding: 0.5rem 4%;
-    }
-
-    .continue-row::-webkit-scrollbar {
-      display: none;
-    }
-
-    .continue-card {
-      flex-shrink: 0;
-      width: 240px;
-      border-radius: 14px;
-      overflow: hidden;
-      cursor: pointer;
-      background: var(--surface);
-      position: relative;
-      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-      border: 1px solid var(--glass-border);
-    }
-
-    .continue-card:hover {
-      transform: scale(1.04) translateY(-4px);
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 23, 68, 0.25);
-    }
-
-    .continue-thumb {
-      position: relative;
-      width: 100%;
-      aspect-ratio: 16/9;
-      overflow: hidden;
-    }
-
-    .continue-thumb img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      transition: transform 0.3s;
-    }
-
-    .continue-card:hover .continue-thumb img {
-      transform: scale(1.05);
-    }
-
-    .continue-overlay {
-      position: absolute;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.45);
-      opacity: 0;
-      transition: opacity 0.25s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .continue-card:hover .continue-overlay {
-      opacity: 1;
-    }
-
-    .continue-play-icon {
-      width: 48px;
-      height: 48px;
-      background: linear-gradient(135deg, var(--red), var(--red2));
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #fff;
-      transform: scale(0.6);
-      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-      box-shadow: 0 4px 20px rgba(255, 23, 68, 0.5);
-    }
-
-    .continue-card:hover .continue-play-icon {
-      transform: scale(1);
-    }
-
-    .continue-progress {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      height: 3px;
-      background: rgba(255, 255, 255, 0.1);
-    }
-
-    .continue-progress-bar {
-      height: 100%;
-      background: linear-gradient(90deg, var(--red), var(--red2));
-      border-radius: 0 2px 2px 0;
-    }
-
-    .continue-info {
-      padding: 0.7rem 0.9rem;
-    }
-
-    .continue-title {
-      font-size: 0.82rem;
-      font-weight: 700;
-      color: #fff;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      margin-bottom: 4px;
-    }
-
-    .continue-meta {
-      font-size: 0.68rem;
-      color: var(--muted2);
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .continue-badge {
-      background: rgba(255, 23, 68, 0.15);
-      border: 1px solid rgba(255, 23, 68, 0.25);
-      color: var(--red2);
-      padding: 2px 7px;
-      border-radius: 6px;
-      font-size: 0.6rem;
-      font-weight: 700;
-      letter-spacing: 0.05em;
-    }
-
-    .continue-remove {
-      position: absolute;
-      top: 8px;
-      right: 8px;
-      width: 28px;
-      height: 28px;
-      background: rgba(0, 0, 0, 0.7);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #fff;
-      cursor: pointer;
-      opacity: 0;
-      transition: all 0.2s;
-      z-index: 2;
-    }
-
-    .continue-card:hover .continue-remove {
-      opacity: 1;
-    }
-
-    .continue-remove:hover {
-      background: rgba(255, 23, 68, 0.7);
-      border-color: var(--red);
-    }
-
-    .continue-nav {
-      display: flex;
-      gap: 0.5rem;
-    }
-
-    .continue-nav-btn {
-      display: none;
-    }
-
     /* ══════════════════════════════ EMPTY STATE ══════════════════════════════ */
     .empty-state {
       text-align: center;
@@ -1836,6 +1309,11 @@
       padding: 0.5rem 4% 0.75rem;
       background: rgba(8, 8, 16, 0.97);
       border-bottom: 1px solid var(--glass-border);
+      position: fixed;
+      top: 72px;
+      left: 0;
+      right: 0;
+      z-index: 199;
     }
 
     .mobile-search-input {
@@ -1911,20 +1389,25 @@
         display: none;
       }
 
-      .btn-auth {
-        display: none;
-      }
-
       .mobile-bottom-nav {
         display: block;
       }
 
       .mobile-search-bar {
         display: block;
+        position: fixed;
+        top: 60px;
+        left: 0;
+        right: 0;
+        z-index: 199;
+        background: rgba(8, 8, 16, 0.97);
+        border-bottom: 1px solid var(--glass-border);
+        padding: 0.5rem 4% 0.75rem;
       }
 
       body {
         padding-bottom: 70px;
+        padding-top: 110px;
       }
 
       .nav-inner {
@@ -1939,10 +1422,25 @@
       .hero {
         height: 55vh;
         min-height: 380px;
+        background: linear-gradient(135deg, var(--surface) 0%, var(--dark) 40%, var(--surface2) 100%);
+      }
+
+      .hero-bg {
+        position: absolute;
+        inset: -5%;
+        background-size: cover;
+        background-position: center 20%;
+      }
+
+      .hero-vignette {
+        background:
+          linear-gradient(to top, rgba(8, 8, 16, 1) 0%, rgba(8, 8, 16, 0.7) 25%, rgba(8, 8, 16, 0.4) 50%, rgba(8, 8, 16, 0.6) 100%),
+          linear-gradient(to right, rgba(8, 8, 16, 0.95) 0%, rgba(8, 8, 16, 0.3) 100%);
       }
 
       .hero-content {
         padding: 0 4% 7vh;
+        z-index: 10;
       }
 
       .hero-title {
@@ -1979,16 +1477,30 @@
       }
 
       .nfx-card:hover {
-        transform: scale(1.06) translateY(-4px);
+        transform: none;
+        box-shadow: none;
+      }
+
+      .nfx-card:active {
+        transform: scale(0.96);
+      }
+
+      .nfx-card-overlay {
+        opacity: 1;
+        background: linear-gradient(to top, rgba(8, 8, 16, 0.9) 0%, rgba(8, 8, 16, 0.4) 35%, transparent 70%);
+      }
+
+      .nfx-card-info {
+        opacity: 1;
+        transform: none;
+      }
+
+      .nfx-card-play {
+        display: none;
       }
 
       .nfx-row-title {
         font-size: 1rem;
-      }
-
-      .genre-chip {
-        font-size: 0.72rem;
-        padding: 6px 13px;
       }
 
       .nfx-row-arrow {
@@ -1997,6 +1509,19 @@
 
       .continue-card {
         width: 185px;
+      }
+
+      .continue-card:hover {
+        transform: none;
+        box-shadow: none;
+      }
+
+      .continue-overlay {
+        opacity: 1;
+      }
+
+      .continue-play-icon {
+        transform: scale(0.8);
       }
 
       .modal {
@@ -2021,6 +1546,14 @@
         left: 1rem;
         max-width: 100%;
       }
+
+      #particles {
+        display: none;
+      }
+
+      .main-content {
+        margin-top: -6vh;
+      }
     }
 
     @media (max-width: 400px) {
@@ -2039,6 +1572,274 @@
       .continue-card {
         width: 160px;
       }
+    }
+
+    /* ══════════════════════════════ CONTINUE WATCHING ══════════════════════════════ */
+    .continue-section {
+      display: none;
+    }
+
+    .continue-nav {
+      display: flex;
+      gap: 6px;
+    }
+
+    .continue-nav-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      border: 1px solid var(--glass-border);
+      background: var(--glass);
+      color: var(--muted2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .continue-nav-btn:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text);
+      border-color: rgba(255, 255, 255, 0.25);
+    }
+
+    .continue-tools {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .continue-edit-btn {
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--muted2);
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      border-radius: 8px;
+      padding: 6px 12px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .continue-edit-btn:hover {
+      color: var(--text);
+      border-color: rgba(255, 255, 255, 0.25);
+    }
+
+    .continue-edit-btn.danger {
+      background: var(--red);
+      border-color: transparent;
+      color: #fff;
+    }
+
+    .continue-edit-btn.danger:hover {
+      background: var(--red2);
+      color: #fff;
+    }
+
+    .continue-edit-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .continue-section.edit-mode .continue-card {
+      cursor: pointer;
+    }
+
+    .continue-select-dot {
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: 2px solid #fff;
+      background: rgba(8, 8, 16, 0.55);
+      color: #fff;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    .continue-section.edit-mode .continue-select-dot {
+      display: flex;
+    }
+
+    .continue-section.edit-mode .continue-overlay {
+      display: none;
+    }
+
+    .continue-card.selected {
+      box-shadow: 0 0 0 3px var(--red);
+      border-radius: 16px;
+    }
+
+    .continue-card.selected .continue-select-dot {
+      background: var(--red);
+      border-color: var(--red);
+    }
+
+    .continue-row {
+      display: flex;
+      gap: 14px;
+      overflow-x: auto;
+      scroll-behavior: smooth;
+      padding: 0 4%;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .continue-row::-webkit-scrollbar {
+      display: none;
+    }
+
+    .continue-card {
+      position: relative;
+      flex-shrink: 0;
+      width: 270px;
+      cursor: pointer;
+      transition: transform 0.3s cubic-bezier(0.34, 1.1, 0.64, 1);
+    }
+
+    .continue-card:hover {
+      transform: translateY(-4px);
+    }
+
+    .continue-card:hover .continue-thumb {
+      border-color: rgba(255, 255, 255, 0.35);
+      box-shadow: 0 14px 36px rgba(0, 0, 0, 0.6);
+    }
+
+    .continue-card.removing {
+      opacity: 0;
+      transform: scale(0.88) translateY(-10px);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+
+    .continue-thumb {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      border-radius: 14px;
+      overflow: hidden;
+      background: var(--surface);
+      border: 1px solid var(--glass-border);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+
+    .continue-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.4s ease;
+    }
+
+    .continue-card:hover .continue-thumb img {
+      transform: scale(1.05);
+    }
+
+    .continue-overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(180deg, rgba(8, 8, 16, 0.05) 0%, rgba(8, 8, 16, 0.35) 55%, rgba(8, 8, 16, 0.7) 100%);
+      opacity: 0;
+      transition: opacity 0.3s;
+      pointer-events: none;
+    }
+
+    .continue-card:hover .continue-overlay {
+      opacity: 1;
+    }
+
+    .continue-play-icon {
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      background: var(--red);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 0 6px rgba(255, 23, 68, 0.25), 0 8px 24px rgba(255, 23, 68, 0.5);
+      transform: scale(0.85);
+      transition: transform 0.3s;
+      pointer-events: auto;
+      cursor: pointer;
+    }
+
+    .continue-card:hover .continue-play-icon {
+      transform: scale(1);
+    }
+
+    .continue-progress {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.18);
+    }
+
+    .continue-progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--red), var(--red2));
+      transition: width 0.4s ease;
+    }
+
+    .continue-info {
+      padding: 0.6rem 0.15rem 0;
+    }
+
+    .continue-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .continue-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 3px;
+      font-size: 0.72rem;
+      color: var(--muted2);
+    }
+
+    .continue-state {
+      font-weight: 600;
+      color: var(--muted2);
+      letter-spacing: 0.02em;
+    }
+
+    .continue-remain {
+      margin-left: auto;
+      color: var(--muted2);
+      font-size: 0.68rem;
+      font-weight: 500;
+    }
+
+    .continue-badge {
+      font-size: 0.58rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      color: #fff;
+      background: linear-gradient(135deg, var(--red), var(--red2));
+      padding: 2px 7px;
+      border-radius: 99px;
     }
 
     /* ══════════════════════════════ ANIMATIONS ══════════════════════════════ */
@@ -2116,12 +1917,6 @@
         <span class="w-accent">W</span>ALEEDFLIX
       </a>
 
-      <div class="nav-links">
-        <button class="nav-link active" id="navHome" onclick="goHome(event)">Home</button>
-        <button class="nav-link" id="navMovies" onclick="switchTab('movie')">Movies</button>
-        <button class="nav-link" id="navTVLink" onclick="switchTab('tv')">TV Shows</button>
-      </div>
-
       <div class="search-wrap">
         <i data-lucide="search" class="search-icon" style="width:14px;height:14px;"></i>
         <input class="search-input" type="text" id="searchInput" placeholder="Search titles…" autocomplete="off" />
@@ -2138,29 +1933,11 @@
         </button>
       </div>
 
-      <!-- Auth -->
-      <div class="nav-auth" id="navAuth">
-        <div id="navGuest">
-          <button class="btn-auth btn-auth-fill" onclick="openAuth('login')">Sign In</button>
-        </div>
-        <div id="navUser" style="display:none;" class="user-menu">
-          <div class="user-avatar" id="userAvatar" onclick="toggleUserDropdown()">W</div>
-          <div class="user-dropdown" id="userDropdown">
-            <div class="user-dropdown-email" id="userEmail">user@email.com</div>
-            <button class="user-dropdown-item" onclick="openHistory(); toggleUserDropdown();">
-              <i data-lucide="clock" style="width:14px;height:14px;"></i> Watch History
-            </button>
-            <button class="user-dropdown-item danger" onclick="signOut()">
-              <i data-lucide="log-out" style="width:14px;height:14px;"></i> Sign Out
-            </button>
-          </div>
-        </div>
       </div>
-    </div>
-  </nav>
+    </nav>
 
   <!-- Mobile search bar (below nav, shown on mobile) -->
-  <div class="mobile-search-bar" style="padding-top: 72px;">
+  <div class="mobile-search-bar">
     <div class="mobile-search-wrap">
       <i data-lucide="search" class="mobile-search-icon" style="width:15px;height:15px;"></i>
       <input class="mobile-search-input" type="text" id="mobileSearchInput" placeholder="Search movies & TV shows…"
@@ -2207,22 +1984,28 @@
   <!-- ═══════════════════════════════ MAIN CONTENT ═══════════════════════════════ -->
   <main class="main-content">
 
-    <!-- Genre bar -->
-    <div class="genre-bar-wrap">
-      <div class="genre-scroll" id="genreBar"></div>
-    </div>
-
     <!-- Continue Watching -->
-    <section class="continue-section nfx-row-section" id="continueSection">
+    <section class="nfx-row-section animate-in continue-section" id="continueSection" style="display:none;">
       <div class="nfx-row-header">
         <h2 class="nfx-row-title">Continue <span>Watching</span></h2>
-        <div class="continue-nav">
-          <button class="continue-nav-btn" onclick="scrollContinue(-1)">
-            <i data-lucide="chevron-left" style="width:14px;height:14px;"></i>
+        <div class="continue-tools">
+          <button type="button" class="continue-edit-btn" id="continueEditBtn" onclick="toggleEditMode(true)">
+            <i data-lucide="pen" style="width:11px;height:11px;"></i> Edit
           </button>
-          <button class="continue-nav-btn" onclick="scrollContinue(1)">
-            <i data-lucide="chevron-right" style="width:14px;height:14px;"></i>
+          <button type="button" class="continue-edit-btn" id="continueDoneBtn" onclick="toggleEditMode(false)" style="display:none;">
+            Done
           </button>
+          <button type="button" class="continue-edit-btn danger" id="continueRemoveBtn" onclick="removeSelected()" style="display:none;">
+            Remove
+          </button>
+          <div class="continue-nav">
+            <button class="continue-nav-btn" onclick="scrollContinue(-1)">
+              <i data-lucide="chevron-left" style="width:14px;height:14px;"></i>
+            </button>
+            <button class="continue-nav-btn" onclick="scrollContinue(1)">
+              <i data-lucide="chevron-right" style="width:14px;height:14px;"></i>
+            </button>
+          </div>
         </div>
       </div>
       <div class="nfx-row-wrap">
@@ -2298,66 +2081,6 @@
     <span id="toastMsg"></span>
   </div>
 
-  <!-- ═══════════════════════ AUTH MODAL ═══════════════════════ -->
-  <div class="auth-backdrop" id="authBackdrop">
-    <div class="auth-box">
-      <button class="auth-close" onclick="closeAuth()">
-        <i data-lucide="x" style="width:13px;height:13px;"></i>
-      </button>
-      <div class="auth-header">
-        <div class="auth-brand"><span class="w-accent">W</span>ALEEDFLIX</div>
-        <div class="auth-sub">Unlimited movies, TV shows, and more</div>
-        <div class="auth-tabs">
-          <button class="auth-tab active" id="authTabLogin" onclick="switchAuthTab('login')">Log In</button>
-          <button class="auth-tab" id="authTabSignup" onclick="switchAuthTab('signup')">Sign Up</button>
-        </div>
-      </div>
-      <div class="auth-body">
-        <div id="loginForm">
-          <div class="auth-field">
-            <label class="auth-label">Username</label>
-            <input class="auth-input" type="text" id="loginUsername" placeholder="Enter username" />
-          </div>
-          <div class="auth-field">
-            <label class="auth-label">Password</label>
-            <input class="auth-input" type="password" id="loginPassword" placeholder="••••••••" />
-          </div>
-          <button class="auth-submit" id="loginBtn" onclick="doLogin()">Log In</button>
-          <div class="auth-error" id="loginError"></div>
-        </div>
-        <div id="signupForm" style="display:none;">
-          <div class="auth-field">
-            <label class="auth-label">Username</label>
-            <input class="auth-input" type="text" id="signupUsername" placeholder="Pick a username" />
-          </div>
-          <div class="auth-field">
-            <label class="auth-label">Password</label>
-            <input class="auth-input" type="password" id="signupPassword" placeholder="Min. 6 characters" />
-          </div>
-          <button class="auth-submit" id="signupBtn" onclick="doSignup()">Create Account</button>
-          <div class="auth-error" id="signupError"></div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ═══════════════════════ HISTORY PANEL ═══════════════════════ -->
-  <div class="history-backdrop" id="historyBackdrop" onclick="closeHistory()"></div>
-  <div class="history-panel" id="historyPanel">
-    <div class="history-panel-header">
-      <div class="history-panel-title">Watch <span>History</span></div>
-      <button class="modal-close" onclick="closeHistory()">
-        <i data-lucide="x" style="width:15px;height:15px;"></i>
-      </button>
-    </div>
-    <div class="history-list" id="historyList">
-      <div class="history-empty">Your watch history is empty.</div>
-    </div>
-    <button class="history-clear-btn" id="historyClearBtn" onclick="clearHistory()" style="display:none;">
-      Clear All History
-    </button>
-  </div>
-
   <!-- ═══════════════════════ MOBILE BOTTOM NAV ═══════════════════════ -->
   <nav class="mobile-bottom-nav">
     <div class="mobile-bottom-nav-inner">
@@ -2379,12 +2102,8 @@
         </div>
         <span>TV Shows</span>
       </button>
-      <button class="mobile-nav-btn" id="mobileNavUser" onclick="currentUser ? openHistory() : openAuth('login')">
-        <div class="mobile-icon-wrap">
-          <i data-lucide="user" style="width:20px;height:20px;"></i>
-        </div>
-        <span id="mobileUserLabel">Sign In</span>
-      </button>
+      </div>
+  </nav>
     </div>
   </nav>
 
@@ -2417,267 +2136,144 @@
       TMDB_BASE,
       IMG_BASE,
       SOURCES,
-      SUPABASE_URL,
-      SUPABASE_ANON_KEY
     } = window.APP_CONFIG || {
       TMDB_API_KEY: '',
       TMDB_BASE: '',
       IMG_BASE: '',
-      SOURCES: [{ name: 'VidKing', type: 'path', base: 'https://vidking.net/embed' }],
-      SUPABASE_URL: '',
-      SUPABASE_ANON_KEY: ''
+      SOURCES: [{ name: 'Main Server', type: 'path', base: 'https://vidfast.vc' }],
     };
 
-    let sbClient = null;
-    let currentUser = null;
-
-    function initSupabase() {
-      try {
-        const sb = window.supabase || window.Supabase;
-        if (!sb || !sb.createClient) { console.warn('Supabase CDN not loaded'); return; }
-        sbClient = sb.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        sbClient.auth.onAuthStateChange((_event, session) => {
-          currentUser = session?.user ?? null;
-          updateNavAuth();
-        });
-        sbClient.auth.getSession().then(({ data: { session } }) => {
-          currentUser = session?.user ?? null;
-          updateNavAuth();
-        });
-      } catch (e) { console.warn('Supabase init failed:', e); }
-    }
-
-    // ─── AUTH UI ─────────────────────────────────────────────────────────────────
-    function updateNavAuth() {
-      const guest = document.getElementById('navGuest');
-      const user = document.getElementById('navUser');
-      const mobileLabel = document.getElementById('mobileUserLabel');
-      if (currentUser) {
-        guest.style.display = 'none';
-        user.style.display = 'block';
-        const email = currentUser.email || '';
-        const username = email.split('@')[0];
-        document.getElementById('userEmail').textContent = username;
-        document.getElementById('userAvatar').textContent = username.charAt(0).toUpperCase();
-        if (mobileLabel) mobileLabel.textContent = 'Profile';
-      } else {
-        guest.style.display = 'flex';
-        user.style.display = 'none';
-        if (mobileLabel) mobileLabel.textContent = 'Sign In';
-      }
-      lucide.createIcons();
-      refreshContinueRow();
-    }
-
-    function openAuth(tab = 'login') {
-      document.getElementById('authBackdrop').classList.add('open');
-      switchAuthTab(tab);
-      document.getElementById('loginError').textContent = '';
-      document.getElementById('signupError').textContent = '';
-      lucide.createIcons();
-    }
-
-    function closeAuth() {
-      document.getElementById('authBackdrop').classList.remove('open');
-    }
-
-    function switchAuthTab(tab) {
-      document.getElementById('loginForm').style.display = tab === 'login' ? 'block' : 'none';
-      document.getElementById('signupForm').style.display = tab === 'signup' ? 'block' : 'none';
-      document.getElementById('authTabLogin').classList.toggle('active', tab === 'login');
-      document.getElementById('authTabSignup').classList.toggle('active', tab === 'signup');
-    }
-
-    async function doLogin() {
-      if (!sbClient) return showToast('⚠ Supabase not configured.');
-      const username = document.getElementById('loginUsername').value.trim();
-      const password = document.getElementById('loginPassword').value;
-      if (!username) return;
-      const email = `${username}@stream.vault`;
-      const btn = document.getElementById('loginBtn');
-      const errEl = document.getElementById('loginError');
-      errEl.textContent = '';
-      btn.disabled = true; btn.textContent = 'Logging in…';
-      const { error } = await sbClient.auth.signInWithPassword({ email, password });
-      btn.disabled = false; btn.textContent = 'Log In';
-      if (error) { errEl.textContent = error.message; return; }
-      closeAuth();
-      showToast('Welcome back!');
-    }
-
-    async function doSignup() {
-      if (!sbClient) return showToast('⚠ Supabase not configured.');
-      const username = document.getElementById('signupUsername').value.trim();
-      const password = document.getElementById('signupPassword').value;
-      if (!username) return;
-      const email = `${username}@stream.vault`;
-      const btn = document.getElementById('signupBtn');
-      const errEl = document.getElementById('signupError');
-      errEl.textContent = '';
-      btn.disabled = true; btn.textContent = 'Creating account…';
-      const { data, error } = await sbClient.auth.signUp({ email, password });
-      if (error) {
-        btn.disabled = false; btn.textContent = 'Create Account';
-        errEl.textContent = error.message; return;
-      }
-      if (data?.session) {
-        btn.disabled = false; btn.textContent = 'Create Account';
-        closeAuth(); showToast('Account created!');
-      } else {
-        const { error: loginError } = await sbClient.auth.signInWithPassword({ email, password });
-        btn.disabled = false; btn.textContent = 'Create Account';
-        if (loginError) { errEl.textContent = 'Account created! Please log in.'; }
-        else { closeAuth(); showToast('Account created successfully!'); }
-      }
-    }
-
-    async function signOut() {
-      toggleUserDropdown();
-      if (!sbClient) return;
-      await sbClient.auth.signOut();
-      showToast('Signed out.');
-    }
-
-    function toggleUserDropdown() {
-      document.getElementById('userDropdown').classList.toggle('open');
-    }
-
-    document.addEventListener('click', (e) => {
-      const menu = document.getElementById('navUser');
-      const dd = document.getElementById('userDropdown');
-      if (dd && !menu?.contains(e.target)) dd.classList.remove('open');
-    });
-
-    // ─── MOBILE BOTTOM NAV ────────────────────────────────────────────────────────
     function setMobileActive(btn) {
       document.querySelectorAll('.mobile-nav-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
     }
 
-    // ─── WATCH HISTORY ────────────────────────────────────────────────────────────
-    async function saveToHistory(item) {
-      if (!sbClient || !currentUser) return;
-      const isTV = !!(item.first_air_date || (item.name && !item.title));
-      await sbClient.from('watch_history').upsert({
-        user_id: currentUser.id,
-        tmdb_id: item.id,
-        media_type: isTV ? 'tv' : 'movie',
+    // ─── CONTINUE WATCHING (guest · localStorage) ─────────────────────────────────
+    const CW_KEY = 'wf_continue';
+
+    function getCW() {
+      try {
+        const items = JSON.parse(localStorage.getItem(CW_KEY)) || [];
+        return items.map(i => ({
+          ...i,
+          key: i.key || cwKey(i.id, i.media_type === 'tv' ? 'tv' : 'movie'),
+        }));
+      }
+      catch (e) { return []; }
+    }
+
+    function setCW(items) {
+      try { localStorage.setItem(CW_KEY, JSON.stringify(items.slice(0, 30))); }
+      catch (e) { }
+    }
+
+    function cwMediaType(item) {
+      return !!(item.first_air_date || (item.name && !item.title)) ? 'tv' : 'movie';
+    }
+
+    function cwKey(id, type) { return type + ':' + id; }
+
+    function findCW(id, type) {
+      const k = cwKey(id, type);
+      return getCW().find(i => i.key === k) || null;
+    }
+
+    function saveToHistory(item) {
+      if (!item || item.id === undefined) return;
+      const type = cwMediaType(item);
+      const key = cwKey(item.id, type);
+      const items = getCW();
+      const existing = items.find(i => i.key === key);
+      const entry = existing || {
+        key,
+        id: item.id,
+        media_type: type,
         title: item.title || item.name || 'Unknown',
         poster_path: item.poster_path || null,
-        watched_at: new Date().toISOString(),
-      }, { onConflict: 'user_id,tmdb_id,media_type' });
+        season: null,
+        episode: null,
+        watch_seconds: 0,
+        position: 0,
+        duration: 0,
+        progress: 0,
+      };
+      if (type === 'tv') {
+        const s = document.getElementById('seasonSelect');
+        const e = document.getElementById('episodeSelect');
+        if (s && e && s.value && e.value) {
+          entry.season = Number(s.value);
+          entry.episode = Number(e.value);
+        } else if (item.season && item.episode) {
+          entry.season = item.season;
+          entry.episode = item.episode;
+        }
+      }
+      entry.watched_at = new Date().toISOString();
+      setCW([entry, ...items.filter(i => i.key !== key)]);
       refreshContinueRow();
     }
 
-    async function loadHistory() {
-      if (!sbClient || !currentUser) return [];
-      const { data, error } = await sbClient
-        .from('watch_history')
-        .select('*')
-        .eq('user_id', currentUser.id)
-        .order('watched_at', { ascending: false })
-        .limit(50);
-      if (error) { console.error(error); return []; }
-      return data || [];
-    }
-
-    async function deleteHistoryItem(id) {
-      if (!sbClient || !currentUser) return;
-      await sbClient.from('watch_history').delete().eq('id', id).eq('user_id', currentUser.id);
-      openHistory();
-    }
-
-    async function clearHistory() {
-      if (!sbClient || !currentUser) return;
-      if (!confirm('Clear your entire watch history?')) return;
-      await sbClient.from('watch_history').delete().eq('user_id', currentUser.id);
-      openHistory();
-    }
-
-    async function openHistory() {
-      if (!currentUser) { openAuth('login'); return; }
-      document.getElementById('historyBackdrop').classList.add('open');
-      document.getElementById('historyPanel').classList.add('open');
-      document.getElementById('historyList').innerHTML = '<div class="history-empty">Loading…</div>';
-      document.getElementById('historyClearBtn').style.display = 'none';
-      lucide.createIcons();
-      const items = await loadHistory();
-      const list = document.getElementById('historyList');
-      if (!items.length) {
-        list.innerHTML = '<div class="history-empty"><i data-lucide="clock" style="width:32px;height:32px;margin:0 auto 0.75rem;display:block;opacity:0.3;"></i>No watch history yet.</div>';
-        lucide.createIcons(); return;
+    function progressLabel(it) {
+      if (it.progress >= 100) return 'Done';
+      if (it.media_type === 'tv') {
+        return it.season && it.episode ? `S${it.season}·E${it.episode}` : 'Resume';
       }
-      document.getElementById('historyClearBtn').style.display = 'block';
-      list.innerHTML = items.map(it => {
-        const poster = it.poster_path
-          ? `${IMG_BASE}/w92${it.poster_path}`
-          : 'https://via.placeholder.com/46x69/111120/ff1744?text=?';
-        const date = new Date(it.watched_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
-        const badge = it.media_type === 'tv' ? 'TV' : 'Movie';
-        const encodedIt = encodeURIComponent(JSON.stringify(it)).replace(/'/g, "%27");
-        return `
-<div class="history-item" onclick="playFromHistory('${encodedIt}')">
-  <img class="history-poster" src="${poster}" alt="${escHtml(it.title)}" loading="lazy" />
-  <div class="history-info">
-    <div class="history-title">${escHtml(it.title)}</div>
-    <div class="history-meta">${badge} · ${date}</div>
-  </div>
-  <button class="history-delete" onclick="event.stopPropagation(); deleteHistoryItem('${it.id}')" title="Remove">
-    <i data-lucide="x" style="width:13px;height:13px;"></i>
-  </button>
-</div>`;
-      }).join('');
-      lucide.createIcons();
+      return it.progress > 0 ? `${Math.round(it.progress)}%` : 'Start';
     }
 
-    function closeHistory() {
-      document.getElementById('historyBackdrop').classList.remove('open');
-      document.getElementById('historyPanel').classList.remove('open');
+    function continueFakeItem(it) {
+      return {
+        id: it.id,
+        title: it.media_type === 'movie' ? it.title : undefined,
+        name: it.media_type === 'tv' ? it.title : undefined,
+        poster_path: it.poster_path,
+        first_air_date: it.media_type === 'tv' ? ' ' : undefined,
+        season: it.season,
+        episode: it.episode,
+      };
     }
 
-    // ─── CONTINUE WATCHING ────────────────────────────────────────────────────────
-    async function refreshContinueRow() {
+    function refreshContinueRow() {
       const section = document.getElementById('continueSection');
       const row = document.getElementById('continueRow');
-      if (!sbClient || !currentUser) { section.classList.remove('has-items'); return; }
-      const items = await loadHistory();
-      if (!items.length) { section.classList.remove('has-items'); return; }
-      section.classList.add('has-items');
+      if (!section || !row) return;
+      const items = getCW();
+      if (!items.length) {
+        section.style.display = 'none';
+        row.innerHTML = '';
+        if (editMode) toggleEditMode(false);
+        return;
+      }
+      section.style.display = 'block';
       row.innerHTML = items.map(it => {
         const backdrop = it.poster_path
           ? `${IMG_BASE}/w500${it.poster_path}`
           : 'https://via.placeholder.com/500x281/111120/ff1744?text=?';
         const badge = it.media_type === 'tv' ? 'TV' : 'Movie';
-        const date = new Date(it.watched_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
-        const fakeItem = {
-          id: it.tmdb_id,
-          title: it.media_type === 'movie' ? it.title : undefined,
-          name: it.media_type === 'tv' ? it.title : undefined,
-          poster_path: it.poster_path,
-          first_air_date: it.media_type === 'tv' ? ' ' : undefined,
-        };
-        const dataAttr = encodeURIComponent(JSON.stringify(fakeItem)).replace(/'/g, "%27");
+        const fake = continueFakeItem(it);
+        const dataAttr = encodeURIComponent(JSON.stringify(fake)).replace(/'/g, "%27");
+        const pct = Math.max(2, Math.min(100, it.progress || 0));
+        const remain = it.duration > 0 && it.progress < 100
+          ? `${Math.max(1, Math.round((it.duration * (100 - pct)) / 100 / 60))}m left`
+          : '';
         return `
-<div class="continue-card">
+<div class="continue-card" data-key="${it.key}" data-item="${dataAttr}">
   <div class="continue-thumb">
     <img src="${backdrop}" alt="${escHtml(it.title)}" loading="lazy" />
-    <div class="continue-overlay" onclick="playFromContinue('${dataAttr}')">
+    <div class="continue-select-dot"><i data-lucide="check" style="width:12px;height:12px;"></i></div>
+    <div class="continue-overlay">
       <div class="continue-play-icon">
         <i data-lucide="play" style="width:18px;height:18px;fill:currentColor;"></i>
       </div>
     </div>
-    <div class="continue-progress">
-      <div class="continue-progress-bar" style="width:${25 + Math.random() * 55 | 0}%"></div>
-    </div>
-    <button class="continue-remove" onclick="event.stopPropagation(); removeContinueItem('${it.id}')" title="Remove">
-      <i data-lucide="x" style="width:11px;height:11px;"></i>
-    </button>
+    <div class="continue-progress"><div class="continue-progress-bar" style="width:${pct}%"></div></div>
   </div>
-  <div class="continue-info" onclick="playFromContinue('${dataAttr}')">
+  <div class="continue-info">
     <div class="continue-title">${escHtml(it.title)}</div>
     <div class="continue-meta">
       <span class="continue-badge">${badge}</span>
-      <span>${date}</span>
+      <span class="continue-state">${progressLabel(it)}</span>
+      ${remain ? `<span class="continue-remain">${remain}</span>` : ''}
     </div>
   </div>
 </div>`;
@@ -2694,32 +2290,127 @@
       openPlayer(item);
     }
 
-    async function removeContinueItem(id) {
-      if (!sbClient || !currentUser) return;
-      await sbClient.from('watch_history').delete().eq('id', id).eq('user_id', currentUser.id);
-      refreshContinueRow();
-    }
-
     function scrollContinue(dir) {
       const row = document.getElementById('continueRow');
-      row.scrollBy({ left: dir * 280, behavior: 'smooth' });
+      if (row) row.scrollBy({ left: dir * 280, behavior: 'smooth' });
     }
 
-    function playFromHistory(it) {
-      closeHistory();
-      if (typeof it === 'string') {
-        try { it = JSON.parse(decodeURIComponent(it)); } catch (e) {
-          try { it = JSON.parse(it); } catch (err) { return; }
-        }
+    document.getElementById('continueRow').addEventListener('click', (e) => {
+      const card = e.target.closest('.continue-card');
+      if (!card) return;
+      e.preventDefault();
+      if (editMode) {
+        card.classList.toggle('selected');
+        updateRemoveBtn();
+      } else {
+        const item = card.getAttribute('data-item');
+        if (item) playFromContinue(item);
       }
-      const fakeItem = {
-        id: it.tmdb_id,
-        title: it.media_type === 'movie' ? it.title : undefined,
-        name: it.media_type === 'tv' ? it.title : undefined,
-        poster_path: it.poster_path,
-      };
-      openPlayer(fakeItem);
+    });
+
+    // ─── CONTINUE EDIT MODE ───────────────────────────────────────────────────────
+    function toggleEditMode(on) {
+      editMode = on;
+      document.getElementById('continueSection').classList.toggle('edit-mode', on);
+      document.getElementById('continueEditBtn').style.display = on ? 'none' : '';
+      document.getElementById('continueDoneBtn').style.display = on ? '' : 'none';
+      document.getElementById('continueRemoveBtn').style.display = on ? '' : 'none';
+      document.querySelectorAll('#continueRow .continue-card').forEach(c => c.classList.remove('selected'));
+      updateRemoveBtn();
     }
+
+    function updateRemoveBtn() {
+      const n = document.querySelectorAll('#continueRow .continue-card.selected').length;
+      const btn = document.getElementById('continueRemoveBtn');
+      if (!btn) return;
+      btn.textContent = n ? `Remove (${n})` : 'Remove';
+      btn.disabled = !n;
+    }
+
+    function removeSelected() {
+      const selected = [...document.querySelectorAll('#continueRow .continue-card.selected')];
+      if (!selected.length) return;
+      const keys = selected.map(c => c.getAttribute('data-key'));
+      selected.forEach(c => c.classList.add('removing'));
+      setTimeout(() => {
+        setCW(getCW().filter(i => !keys.includes(i.key)));
+        toggleEditMode(false);
+        refreshContinueRow();
+      }, 300);
+    }
+
+    // ─── PROGRESS TRACKING ────────────────────────────────────────────────────────
+    let watchTimer = null;
+    let watchSessionStart = 0;
+    const PROGRESS_TARGET = 120;
+
+    function startWatchTimer() {
+      stopWatchTimer();
+      watchSessionStart = Date.now();
+      watchTimer = setInterval(() => tickWatchProgress(), 10000);
+    }
+
+    function stopWatchTimer() {
+      if (watchTimer) { clearInterval(watchTimer); watchTimer = null; }
+    }
+
+    function activeCWEntry() {
+      if (!playingItem || playingItem.id === undefined) return null;
+      return findCW(playingItem.id, cwMediaType(playingItem));
+    }
+
+    function updateCWCard(entry) {
+      const card = document.querySelector(`.continue-card[data-key="${entry.key}"]`);
+      if (!card) return;
+      const bar = card.querySelector('.continue-progress-bar');
+      if (bar) bar.style.width = `${Math.max(2, Math.min(100, entry.progress || 0))}%`;
+      const state = card.querySelector('.continue-state');
+      if (state) state.textContent = progressLabel(entry);
+    }
+
+    function tickWatchProgress() {
+      if (!playingItem || playingItem.id === undefined) return;
+      const entry = activeCWEntry();
+      if (!entry) return;
+      const elapsed = (Date.now() - watchSessionStart) / 1000;
+      watchSessionStart = Date.now();
+      entry.watch_seconds = (entry.watch_seconds || 0) + elapsed;
+      const realPct = entry.duration > 0 ? (entry.position / entry.duration) * 100 : 0;
+      entry.progress = realPct > 0
+        ? Math.min(100, realPct)
+        : Math.min(100, (entry.watch_seconds / PROGRESS_TARGET) * 100);
+      const items = getCW();
+      const idx = items.findIndex(i => i.key === entry.key);
+      if (idx > -1) { items[idx] = entry; setCW(items); }
+      updateCWCard(entry);
+    }
+
+    function extractProgress(o) {
+      if (!o || typeof o !== 'object') return null;
+      if (typeof o.currentTime === 'number' && typeof o.duration === 'number' && o.duration > 0) {
+        return { position: o.currentTime, duration: o.duration };
+      }
+      for (const v of Object.values(o)) {
+        const r = extractProgress(v);
+        if (r) return r;
+      }
+      return null;
+    }
+
+    window.addEventListener('message', (e) => {
+      if (!playingItem || playingItem.id === undefined) return;
+      const entry = activeCWEntry();
+      if (!entry) return;
+      const p = extractProgress(e.data);
+      if (!p || !isFinite(p.position)) return;
+      entry.position = Math.max(0, p.position);
+      entry.duration = p.duration > 0 ? p.duration : entry.duration;
+      if (entry.duration > 0) entry.progress = Math.min(100, (entry.position / entry.duration) * 100);
+      const items = getCW();
+      const idx = items.findIndex(i => i.key === entry.key);
+      if (idx > -1) { items[idx] = entry; setCW(items); }
+      updateCWCard(entry);
+    });
 
     // ─── TMDB FETCH ───────────────────────────────────────────────────────────────
     async function tmdbFetch(endpoint, params = {}) {
@@ -2743,39 +2434,21 @@
 
     // ─── STATE ────────────────────────────────────────────────────────────────────
     let currentTab = 'movie';
-    let currentGenre = null;
     let heroItems = [];
     let heroIndex = 0;
     let heroTimer = null;
     let currentItem = null;
+    let playingItem = null;
     let currentSourceIndex = 0;
     let tvSeasons = [];
     let searchTimeout = null;
-
-    // ─── GENRES ──────────────────────────────────────────────────────────────────
-    const MOVIE_GENRES = [
-      { id: 28, name: 'Action' }, { id: 12, name: 'Adventure' }, { id: 16, name: 'Animation' },
-      { id: 35, name: 'Comedy' }, { id: 80, name: 'Crime' }, { id: 99, name: 'Documentary' },
-      { id: 18, name: 'Drama' }, { id: 14, name: 'Fantasy' }, { id: 27, name: 'Horror' },
-      { id: 9648, name: 'Mystery' }, { id: 10749, name: 'Romance' }, { id: 878, name: 'Sci-Fi' },
-      { id: 53, name: 'Thriller' }, { id: 37, name: 'Western' },
-    ];
-
-    const TV_GENRES = [
-      { id: 10759, name: 'Action & Adventure' }, { id: 16, name: 'Animation' }, { id: 35, name: 'Comedy' },
-      { id: 80, name: 'Crime' }, { id: 99, name: 'Documentary' }, { id: 18, name: 'Drama' },
-      { id: 10751, name: 'Family' }, { id: 10762, name: 'Kids' }, { id: 9648, name: 'Mystery' },
-      { id: 10763, name: 'News' }, { id: 10764, name: 'Reality' }, { id: 10765, name: 'Sci-Fi & Fantasy' },
-      { id: 10766, name: 'Soap' }, { id: 10767, name: 'Talk' }, { id: 10768, name: 'War & Politics' }, { id: 37, name: 'Western' },
-    ];
+    let editMode = false;
 
     // ─── INIT ────────────────────────────────────────────────────────────────────
     window.addEventListener('DOMContentLoaded', () => {
       lucide.createIcons();
-      buildGenreBar();
       fetchAll();
       setupSearch();
-      initSupabase();
       setupNavScroll();
     });
 
@@ -2792,9 +2465,12 @@
         clearTimeout(searchTimeout);
         if (!q) { fetchAll(); return; }
         document.getElementById('heroSection').style.display = 'none';
+        document.getElementById('continueSection').style.display = 'none';
         document.getElementById('topRatedSection').style.display = 'none';
         document.querySelector('#trendingSection .see-all').style.display = 'none';
-        document.querySelector('#trendingSection .nfx-row-title').innerHTML = `Results for "<span>${escHtml(q)}</span>"`;
+        document.getElementById('trendingSection').classList.add('searching');
+        document.querySelector('.main-content').classList.add('search-active');
+        document.querySelector('#trendingSection .nfx-row-title').innerHTML = `Results for "<span>${escHtml(q)}</span>" <span class="search-count">Searching...</span>`;
         showSkeletons('trendingRow', 12);
         searchTimeout = setTimeout(() => searchContent(q), 400);
       }
@@ -2813,54 +2489,39 @@
       document.getElementById('searchInput').value = '';
       const mobileInp = document.getElementById('mobileSearchInput');
       if (mobileInp) mobileInp.value = '';
-      currentGenre = null;
-      document.querySelectorAll('.genre-chip').forEach((c, i) => {
-        c.classList.toggle('active', i === 0);
-      });
       fetchAll();
     }
 
     async function searchContent(query) {
-      const type = currentTab === 'movie' ? 'movie' : 'tv';
       try {
-        const data = await tmdbFetch(`search/${type}`, { query, page: 1 });
-        document.querySelector('#trendingSection .nfx-row-title').innerHTML = `Results for "<span>${escHtml(query)}</span>"`;
-        renderRow('trendingRow', data.results || []);
+        const [movieData, tvData] = await Promise.all([
+          tmdbFetch('search/movie', { query, page: 1 }),
+          tmdbFetch('search/tv', { query, page: 1 })
+        ]);
+        const movies = (movieData.results || []).map(m => ({ ...m, media_type: 'movie' }));
+        const tvs = (tvData.results || []).map(t => ({ ...t, media_type: 'tv' }));
+        const results = [...movies, ...tvs].sort((a, b) => (b.vote_count || 0) - (a.vote_count || 0));
+        const count = results.length;
+        const countText = count > 0
+          ? `${count} results`
+          : `No results found`;
+        document.querySelector('#trendingSection .nfx-row-title').innerHTML = `Results for "<span>${escHtml(query)}</span>" <span class="search-count">${countText}</span>`;
+        renderRow('trendingRow', results);
       } catch (e) { showApiError(e); }
     }
 
     // ─── TAB SWITCH ──────────────────────────────────────────────────────────────
     function switchTab(tab) {
       currentTab = tab;
-      currentGenre = null;
       document.getElementById('searchInput').value = '';
       const mobileInp = document.getElementById('mobileSearchInput');
       if (mobileInp) mobileInp.value = '';
       document.getElementById('tabMovies').classList.toggle('active', tab === 'movie');
       document.getElementById('tabTV').classList.toggle('active', tab === 'tv');
-      document.getElementById('navMovies').classList.toggle('active', tab === 'movie');
-      document.getElementById('navTVLink').classList.toggle('active', tab === 'tv');
-      document.getElementById('navHome').classList.remove('active');
       const label = tab === 'movie' ? 'Movies' : 'TV Shows';
       document.getElementById('sectionLabel').textContent = label;
-      buildGenreBar();
       fetchAll();
       lucide.createIcons();
-    }
-
-    // ─── GENRE BAR ───────────────────────────────────────────────────────────────
-    function buildGenreBar() {
-      const genres = currentTab === 'movie' ? MOVIE_GENRES : TV_GENRES;
-      const bar = document.getElementById('genreBar');
-      bar.innerHTML = `<button class="genre-chip active" onclick="filterGenre(null, this)">All</button>` +
-        genres.map(g => `<button class="genre-chip" onclick="filterGenre(${g.id}, this)">${g.name}</button>`).join('');
-    }
-
-    function filterGenre(id, el) {
-      currentGenre = id;
-      document.querySelectorAll('.genre-chip').forEach(c => c.classList.remove('active'));
-      el.classList.add('active');
-      fetchAll();
     }
 
     // ─── FETCH ALL ───────────────────────────────────────────────────────────────
@@ -2868,6 +2529,8 @@
       document.getElementById('heroSection').style.display = 'flex';
       document.getElementById('topRatedSection').style.display = 'block';
       document.querySelector('#trendingSection .see-all').style.display = 'flex';
+      document.getElementById('trendingSection').classList.remove('searching');
+      document.querySelector('.main-content').classList.remove('search-active');
       const label = currentTab === 'movie' ? 'Movies' : 'TV Shows';
       document.querySelector('#trendingSection .nfx-row-title').innerHTML = `Trending <span id="sectionLabel">${label}</span> <span class="nfx-row-tag">HOT</span>`;
       showSkeletons('trendingRow', 12);
@@ -2880,11 +2543,9 @@
         ]);
         heroItems = trending.slice(0, 5);
         setupHero();
-        const filtered = currentGenre
-          ? items => items.filter(m => m.genre_ids?.includes(currentGenre))
-          : items => items;
-        renderRow('trendingRow', filtered(trending));
-        renderRow('topRatedRow', filtered(topRated));
+        renderRow('trendingRow', trending);
+        renderRow('topRatedRow', topRated);
+        refreshContinueRow();
       } catch (e) { showApiError(e); }
     }
 
@@ -2896,15 +2557,23 @@
     }
 
     // ─── HERO ─────────────────────────────────────────────────────────────────────
-    function setupHero() {
-      if (!heroItems.length) return;
-      buildHeroDots();
-      showHeroItem(0);
+    function startHeroRotation() {
       clearInterval(heroTimer);
       heroTimer = setInterval(() => {
         heroIndex = (heroIndex + 1) % heroItems.length;
         showHeroItem(heroIndex);
       }, 7000);
+    }
+
+    function stopHeroRotation() {
+      if (heroTimer) { clearInterval(heroTimer); heroTimer = null; }
+    }
+
+    function setupHero() {
+      if (!heroItems.length) return;
+      buildHeroDots();
+      showHeroItem(0);
+      startHeroRotation();
     }
 
     function buildHeroDots() {
@@ -2917,11 +2586,7 @@
     function goHero(i) {
       heroIndex = i;
       showHeroItem(i);
-      clearInterval(heroTimer);
-      heroTimer = setInterval(() => {
-        heroIndex = (heroIndex + 1) % heroItems.length;
-        showHeroItem(heroIndex);
-      }, 7000);
+      startHeroRotation();
     }
 
     function showHeroItem(i) {
@@ -2970,7 +2635,7 @@
         row.innerHTML = `<div class="empty-state" style="width:100%;display:flex;flex-direction:column;align-items:center;min-height:200px;justify-content:center;">
 <i data-lucide="search-x" style="width:36px;height:36px;color:var(--red);margin:0 auto 1rem;display:block;opacity:0.6;"></i>
 <h3>Nothing found</h3>
-<p style="font-size:0.82rem;margin-top:0.3rem;">Try a different search or genre.</p>
+<p style="font-size:0.82rem;margin-top:0.3rem;">Try a different search.</p>
 </div>`;
         lucide.createIcons();
         return;
@@ -3036,7 +2701,7 @@
           try { item = JSON.parse(item); } catch (err) { return; }
         }
       }
-      currentItem = item;
+      playingItem = item;
       currentSourceIndex = 0;
       const isTV = !!(item.first_air_date || item.name && !item.title);
       const title = item.title || item.name;
@@ -3044,25 +2709,38 @@
       buildSourceSwitcher();
       document.getElementById('playerModal').classList.add('open');
       document.body.style.overflow = 'hidden';
+      stopHeroRotation();
       saveToHistory(item);
       if (isTV) {
         document.getElementById('episodeBar').style.display = 'flex';
         await buildSeasonSelector(item.id);
+        if (item.season && item.episode) {
+          const seasonSel = document.getElementById('seasonSelect');
+          if (seasonSel.value !== String(item.season)) {
+            seasonSel.value = String(item.season);
+            await buildEpisodeSelector(item.id, Number(item.season));
+          }
+          const epSel = document.getElementById('episodeSelect');
+          if (epSel.value !== String(item.episode)) epSel.value = String(item.episode);
+          reloadCurrentPlayer();
+        }
+        saveToHistory(playingItem);
       } else {
         document.getElementById('episodeBar').style.display = 'none';
         loadPlayerSrc(buildSourceUrl(item.id, false));
       }
+      startWatchTimer();
       lucide.createIcons();
     }
 
     function closeModal() {
+      tickWatchProgress();
+      stopWatchTimer();
       document.getElementById('playerModal').classList.remove('open');
       document.getElementById('playerFrame').src = '';
       document.body.style.overflow = '';
-    }
-
-    function loadPlayerSrc(src) {
-      document.getElementById('playerFrame').src = src;
+      playingItem = null;
+      startHeroRotation();
     }
 
     function buildSourceSwitcher() {
@@ -3072,6 +2750,10 @@
       ).join('');
     }
 
+    function loadPlayerSrc(src) {
+      document.getElementById('playerFrame').src = src;
+    }
+
     function switchSource(index) {
       currentSourceIndex = index;
       buildSourceSwitcher();
@@ -3079,20 +2761,24 @@
     }
 
     function reloadCurrentPlayer() {
-      if (!currentItem) return;
-      const isTV = !!(currentItem.first_air_date || (currentItem.name && !currentItem.title));
+      if (!playingItem) return;
+      const isTV = !!(playingItem.first_air_date || (playingItem.name && !playingItem.title));
       if (isTV) {
         const s = document.getElementById('seasonSelect').value;
         const e = document.getElementById('episodeSelect').value;
-        loadPlayerSrc(buildSourceUrl(currentItem.id, true, s, e));
+        loadPlayerSrc(buildSourceUrl(playingItem.id, true, s, e));
       } else {
-        loadPlayerSrc(buildSourceUrl(currentItem.id, false));
+        loadPlayerSrc(buildSourceUrl(playingItem.id, false));
       }
     }
 
     function buildSourceUrl(id, isTV, season, episode) {
       const src = SOURCES[currentSourceIndex];
       if (!src) return '';
+      if (src.base.includes('multiembed.mov')) {
+        if (isTV) return `${src.base}/?video_id=${id}&tmdb=1&s=${season}&e=${episode}`;
+        return `${src.base}/?video_id=${id}&tmdb=1`;
+      }
       if (isTV) {
         if (src.type === 'segment') return `${src.base}/tv/${id}/season/${season}/episode/${episode}`;
         return `${src.base}/tv/${id}/${season}/${episode}`;
@@ -3137,16 +2823,17 @@
     }
 
     async function onSeasonChange() {
-      if (!currentItem) return;
+      if (!playingItem) return;
       const s = document.getElementById('seasonSelect').value;
-      await buildEpisodeSelector(currentItem.id, s);
+      await buildEpisodeSelector(playingItem.id, s);
     }
 
     function onEpisodeChange() {
-      if (!currentItem) return;
+      if (!playingItem) return;
       const s = document.getElementById('seasonSelect').value;
       const e = document.getElementById('episodeSelect').value;
-      loadPlayerSrc(buildSourceUrl(currentItem.id, true, s, e));
+      loadPlayerSrc(buildSourceUrl(playingItem.id, true, s, e));
+      saveToHistory(playingItem);
     }
 
     // ─── LOAD MORE ────────────────────────────────────────────────────────────────
@@ -3193,7 +2880,7 @@
 
     // Keyboard
     document.addEventListener('keydown', e => {
-      if (e.key === 'Escape') { closeModal(); closeAuth(); closeHistory(); }
+      if (e.key === 'Escape') { closeModal(); }
     });
   </script>
 </body>
